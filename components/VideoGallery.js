@@ -65,13 +65,14 @@ const VideoGallery = ({ videos, onVideoLoad }) => {
   return (
     <div className={styles.galleryViewport}>
       <div className={styles.videoGallery} ref={trackRef}>
-        {videosToDisplay.map((video) => (
+        {videosToDisplay.map((video, idx) => (
           <VideoCard
             key={video.id}
             videoSrc={video.videoSrc}
             thumbnailSrc={video.thumbnailSrc}
             prompt={video.prompt}
-            onLoad={onVideoLoad}  // Pass down the loading callback here!
+            onLoad={onVideoLoad}
+            index={idx} // Pass index here
           />
         ))}
       </div>
