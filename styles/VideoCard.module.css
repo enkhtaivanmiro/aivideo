@@ -7,8 +7,9 @@
   color: #e0e0e0;
   height: 60vh;
 }
+
 .videoPlayer:hover {
-  opacity: 0.7;
+  opacity: 0.5;
 }
 
 .videoWrapper {
@@ -32,8 +33,8 @@
   white-space: normal;
   overflow: hidden;
   text-overflow: ellipsis;
-  border-radius: 4px; /* Optional: for rounded corners on the prompt bar */
-  z-index: 2;     /* Prompt overlay above video, but below controls */
+  border-radius: 4px;
+  z-index: 2;
 }
 
 .videoPlayer {
@@ -85,8 +86,44 @@
   font-size: 0.875rem;
   line-height: 1.4;
   margin: 0;
-  background-color: #111111; 
+  background-color: #111111;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+@media (max-width: 768px) {
+  .videoPromptOverlay {
+    opacity: 1;
+    overflow: visible;
+    white-space: normal;
+    text-overflow: unset;
+    max-height: none;
+    position: relative;
+    bottom: auto;
+    left: auto;
+    right: auto;
+    margin-top: 10px;
+    border-radius: 4px;
+  }
+
+  .videoWrapper {
+    position: relative;
+    height: auto !important;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .videoPlayer {
+    position: relative;
+    height: auto !important;
+    width: 100%;
+    object-fit: contain;
+  }
+
+  .videoCard {
+    width: 100%;
+    height: auto !important;
+    flex-shrink: 0;
+  }
 }
