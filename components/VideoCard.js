@@ -8,13 +8,12 @@ const VideoCard = ({ videoSrc, thumbnailSrc, prompt, onLoad, index, isDesktop })
   const [isMuted, setIsMuted] = useState(true);
   const [showControls, setShowControls] = useState(false);
 
-  // Detect visibility with IntersectionObserver
+  // Require full visibility
   const { ref: inViewRef, inView } = useInView({
-    threshold: 0.5,
+    threshold: 1,
     triggerOnce: false,
   });
 
-  // Combine refs if needed
   const setRefs = (node) => {
     inViewRef(node);
   };
@@ -25,21 +24,20 @@ const VideoCard = ({ videoSrc, thumbnailSrc, prompt, onLoad, index, isDesktop })
     }
   }, [isMuted]);
 
-  // Control autoplay and loop based on visibility, index, and device
+  // Play when fully in view, pause when not
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
-    if (inView && index < 2 && isDesktop) {
+    if (inView) {
       video.play().catch(() => {});
       setIsPlaying(true);
     } else {
       video.pause();
       setIsPlaying(false);
     }
-  }, [inView, index, isDesktop]);
+  }, [inView]);
 
-  // Handle Play/Pause manually
   const handlePlayPause = () => {
     if (!videoRef.current) return;
 
@@ -50,7 +48,6 @@ const VideoCard = ({ videoSrc, thumbnailSrc, prompt, onLoad, index, isDesktop })
     }
   };
 
-  // Handle Mute/Unmute
   const handleMuteUnmute = () => {
     if (!videoRef.current) return;
 
@@ -69,18 +66,15 @@ const VideoCard = ({ videoSrc, thumbnailSrc, prompt, onLoad, index, isDesktop })
         <video
           ref={videoRef}
           src={videoSrc}
-          // preload auto only for first visible video on desktop, else metadata
-          preload={index === 0 && isDesktop ? 'auto' : 'metadata'}
+          preload={index === 0 ? 'auto' : 'metadata'}
           poster={thumbnailSrc}
           className={styles.videoPlayer}
-          // loop only on desktop for first 2 videos
-          loop={isDesktop && inView && index < 2}
+          loop={inView}
           playsInline
           muted
           onLoadedData={onLoad}
           onPlay={() => setIsPlaying(true)}
           onPause={() => setIsPlaying(false)}
-          // no autoPlay attr to control manually
         />
         {showControls && (
           <>
@@ -100,5 +94,4 @@ const VideoCard = ({ videoSrc, thumbnailSrc, prompt, onLoad, index, isDesktop })
   );
 };
 
-// Memoize to reduce unnecessary re-renders
 export default memo(VideoCard);
