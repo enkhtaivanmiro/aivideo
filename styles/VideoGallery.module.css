@@ -1,0 +1,99 @@
+/* styles/VideoGallery.module.css */
+
+.galleryViewport {
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+  margin: 0 auto;
+}
+
+.videoGallery {
+  display: grid;
+  grid-auto-flow: column; 
+  grid-auto-columns: 400px; 
+  
+  width: fit-content; 
+  height: 100vh;
+  align-items: flex-end; 
+}
+
+.videoGallery.animateTrack {
+  animation-name: scrollHorizontal;
+  animation-duration: var(--scroll-duration, 40s);
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+/* Pause animation on hover of the viewport */
+.galleryViewport:hover .videoGallery.animateTrack {
+  animation-play-state: paused;
+}
+
+@keyframes scrollHorizontal {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(calc(-1 * var(--total-scroll-width, 4000px))); /* Default scroll distance */
+  }
+}
+
+/* --- Your Media Queries --- */
+/* These will override the desktop layout and attempt to disable the animation. */
+
+@media (max-width: 768px) {
+  .galleryViewport { /* Allow viewport to grow if content wraps */
+    height: auto;
+    overflow-y: auto; /* Allow vertical scroll for wrapped content */
+    overflow-x: hidden; /* Prevent horizontal scroll */
+  }
+  .videoGallery {
+    display: grid; /* Explicitly reset from grid-auto-flow: column */
+    grid-auto-flow: row; /* Default flow for wrapping grids */
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 15px; /* From your CSS */
+    padding: 15px; /* From your CSS */
+    width: auto; /* Let it fill the viewport normally */
+    height: auto; /* Adjust height to content */
+    align-items: initial; /* Reset alignment */
+    transform: translateX(0) !important; /* Reset any transform from animation */
+  }
+  .videoGallery.animateTrack {
+    animation: none !important; /* Disable horizontal scroll animation */
+  }
+}
+
+@media (max-width: 480px) {
+  .videoGallery {
+    grid-template-columns: 1fr;
+    gap: 10px; 
+    padding: 10px; 
+  }
+  .videoGallery.animateTrack {
+    animation: none !important;
+  }
+}
+/* styles/VideoCard.module.css - reminder for mobile overrides */
+/* ... (existing desktop styles) ... */
+
+@media (max-width: 768px) {
+  .videoCard {
+    width: 280px; /* Example mobile width */
+    height: auto !important;
+    flex-shrink: 0;
+  }
+  .videoWrapper {
+    height: auto !important;
+  }
+  .videoPlayer {
+    position: relative; /* Or absolute if wrapper maintains aspect ratio */
+    height: 100% !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .videoCard {
+    width: 240px;
+  }
+}
