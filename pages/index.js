@@ -22,7 +22,7 @@ export default function HomePage() {
         <meta name="description" content="A gallery of cool videos" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="home-page-main" style={{ textAlign: 'center', backgroundImage: 'url(/Hero-grad.png)' }}>
+      <main className="home-page-main" style={{ textAlign: 'center', backgroundImage: 'url(/Hero-grad.png)', backgroundRepeat: 'no-repeat'}}>
         <header style={{ display: 'flex', justifyContent: 'space-between', padding: '40px' }}>
           <h1>Logo</h1>
           <button style={{ padding: '12px 20px', borderRadius: '18px', border: '0', backgroundColor: 'white', fontSize: '13px', color: '#06090C' }}>
