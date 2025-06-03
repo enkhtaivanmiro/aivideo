@@ -9,6 +9,7 @@ const VideoGallery = ({ videos, onVideoLoad }) => {
   const trackRef = useRef(null);
   const [isDesktop, setIsDesktop] = useState(false);
 
+  // Detect desktop/mobile
   useEffect(() => {
     const checkScreenSize = () => {
       setIsDesktop(window.innerWidth > 768);
@@ -18,13 +19,14 @@ const VideoGallery = ({ videos, onVideoLoad }) => {
     return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
 
+  // Handle looping animation only on desktop, disable on mobile
   const videosToDisplay = useMemo(() => {
     if (isDesktop && videos && videos.length > 1) {
       const originalTotalWidth = videos.length * (CARD_WIDTH + CARD_GAP);
       if (originalTotalWidth > (typeof window !== 'undefined' ? window.innerWidth * 0.8 : 1000)) {
-        const secondSet = videos.map(video => ({
+        const secondSet = videos.map((video) => ({
           ...video,
-          id: `${video.id}-loop-${Math.random().toString(36).substring(2, 9)}`
+          id: `${video.id}-loop-${Math.random().toString(36).substring(2, 9)}`,
         }));
         return [...videos, ...secondSet];
       }
@@ -35,7 +37,13 @@ const VideoGallery = ({ videos, onVideoLoad }) => {
   useEffect(() => {
     const currentTrack = trackRef.current;
 
-    if (isDesktop && currentTrack && videos && videos.length > 0 && videosToDisplay.length > videos.length) {
+    if (
+      isDesktop &&
+      currentTrack &&
+      videos &&
+      videos.length > 0 &&
+      videosToDisplay.length > videos.length
+    ) {
       const numOriginalVideos = videos.length;
       const scrollWidth = numOriginalVideos * (CARD_WIDTH + CARD_GAP);
 
@@ -72,7 +80,8 @@ const VideoGallery = ({ videos, onVideoLoad }) => {
             thumbnailSrc={video.thumbnailSrc}
             prompt={video.prompt}
             onLoad={onVideoLoad}
-            index={idx} // Pass index here
+            index={idx}
+            isDesktop={isDesktop} // Pass isDesktop for mobile/desktop handling
           />
         ))}
       </div>
@@ -80,4 +89,4 @@ const VideoGallery = ({ videos, onVideoLoad }) => {
   );
 };
 
-export default VideoGallery;
+export default React.memo(VideoGallery);
