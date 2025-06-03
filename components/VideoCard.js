@@ -61,7 +61,8 @@ const VideoCard = ({ videoSrc, thumbnailSrc, prompt, onLoad }) => {
         <video
           ref={videoRef}
           src={videoSrc}
-          // poster={thumbnailSrc} // Optional
+          preload="metadata"
+          poster={thumbnailSrc} // Optional
           className={styles.videoPlayer}
           loop
           playsInline
