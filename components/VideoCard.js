@@ -1,8 +1,7 @@
-// components/VideoCard.js
 import { useState, useRef, useEffect } from 'react';
 import styles from '../styles/VideoCard.module.css';
 
-const VideoCard = ({ videoSrc, thumbnailSrc, prompt }) => { // Added thumbnailSrc back to props if you want to use it
+const VideoCard = ({ videoSrc, thumbnailSrc, prompt, onLoad }) => {
   const videoRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
@@ -12,16 +11,14 @@ const VideoCard = ({ videoSrc, thumbnailSrc, prompt }) => { // Added thumbnailSr
     if (videoRef.current) {
       videoRef.current.muted = isMuted;
     }
-  }, [isMuted]); // This ensures initial muted state from React is applied
+  }, [isMuted]);
 
   const handlePlayPause = () => {
     if (videoRef.current) {
       if (videoRef.current.paused || videoRef.current.ended) {
         videoRef.current.play();
-        // setIsPlaying(true); // onPlay event handler will do this
       } else {
         videoRef.current.pause();
-        // setIsPlaying(false); // onPause event handler will do this
       }
     }
   };
@@ -36,10 +33,9 @@ const VideoCard = ({ videoSrc, thumbnailSrc, prompt }) => { // Added thumbnailSr
   useEffect(() => {
     const videoElement = videoRef.current;
     if (videoElement) {
-      const handleVideoEnd = () => setIsPlaying(false); // Correctly sets playing to false on end
+      const handleVideoEnd = () => setIsPlaying(false);
       videoElement.addEventListener('ended', handleVideoEnd);
-      
-      // Sync isPlaying state if video starts playing due to autoPlay
+
       if (!videoElement.paused && !isPlaying) {
         setIsPlaying(true);
       }
@@ -48,8 +44,7 @@ const VideoCard = ({ videoSrc, thumbnailSrc, prompt }) => { // Added thumbnailSr
         videoElement.removeEventListener('ended', handleVideoEnd);
       };
     }
-  }, [isPlaying]); // Added isPlaying to dependencies to help sync
-
+  }, [isPlaying]);
 
   return (
     <div className={styles.videoCard}>
@@ -57,8 +52,6 @@ const VideoCard = ({ videoSrc, thumbnailSrc, prompt }) => { // Added thumbnailSr
         className={styles.videoWrapper}
         onMouseEnter={() => {
           setShowControls(true);
-          // If video is autoplaying and muted, and we want to ensure isPlaying is true on hover
-          // (though onPlay should handle it)
           if (videoRef.current && !videoRef.current.paused && !isPlaying) {
             setIsPlaying(true);
           }
@@ -68,20 +61,20 @@ const VideoCard = ({ videoSrc, thumbnailSrc, prompt }) => { // Added thumbnailSr
         <video
           ref={videoRef}
           src={videoSrc}
-          // If you have thumbnail images, you can add the poster attribute back:
-          // poster={thumbnailSrc} 
+          // poster={thumbnailSrc} // Optional
           className={styles.videoPlayer}
           loop
-          playsInline // Important for iOS
-          autoPlay  // Video will attempt to autoplay
-          muted     // Autoplay typically requires video to be muted initially
+          playsInline
+          autoPlay
+          muted
+          onLoadedData={onLoad}  // <-- Important callback here
           onPlay={() => setIsPlaying(true)}
           onPause={() => setIsPlaying(false)}
         />
         {showControls && (
-          <> {/* Using a Fragment to return multiple elements */}
+          <>
             <p className={styles.videoPromptOverlay}>{prompt}</p>
-            <div className={styles.controls}> {/* This div is for buttons */}
+            <div className={styles.controls}>
               <button onClick={handlePlayPause} className={styles.controlButton}>
                 {isPlaying ? '❚❚' : '▶'}
               </button>
@@ -89,12 +82,9 @@ const VideoCard = ({ videoSrc, thumbnailSrc, prompt }) => { // Added thumbnailSr
                 {isMuted ? '🔇' : '🔊'}
               </button>
             </div>
-            {/* The prompt is now separate and will be styled as an overlay */}
           </>
         )}
       </div>
-      {/* The prompt that was previously rendered outside videoWrapper (in my earlier examples)
-          or the one you had inside styles.controls is now replaced by videoPromptOverlay. */}
     </div>
   );
 };
