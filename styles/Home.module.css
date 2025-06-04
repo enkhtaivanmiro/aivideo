@@ -60,19 +60,6 @@
   border-radius: 5px;
 }
 
-.progressBarContainer {
-  height: 5px;
-  background-color: rgba(255, 255, 255, 0.2); /* Light grey for the track */
-  margin-top: -5px; /* Overlap with the image slightly for a seamless look */
-  position: relative;
-  z-index: 10;
-}
-
-.progressBar {
-  height: 100%;
-  background-color: red; /* Red progress bar */
-}
-
 .labelContainer {
   position: absolute;
   top: 10px;

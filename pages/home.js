@@ -1,54 +1,56 @@
 import Head from 'next/head';
 import Image from 'next/image'; 
 import styles from '../styles/Home.module.css';
+import Header from '../components/header';
+import Hero from '../components/hero';
 
 const continueWatchingData = [
   {
     id: 1,
     title: 'Hunter x Hunter',
-    image: '/images/hunter.webp', 
+    image: '/images/cover.webp', 
     progress: 80, 
     labels: ['Approved'],
   },
   {
     id: 2,
     title: 'Too Hot To Handle',
-    image: '/images/hunter.webp',
+    image: '/images/cover.webp',
     progress: 60,
     labels: ['In Review'],
   },
   {
     id: 3,
     title: 'My Hero Academia',
-    image: '/images/hunter.webp',
+    image: '/images/cover.webp',
     progress: 0,
     labels: ['Rejected'],
   },
   {
     id: 4,
-    title: 'How to Sell Drugs Online (Fast)',
-    image: '/images/hunter.webp',
+    title: 'Cover',
+    image: '/images/cover.webp',
     progress: 45,
     labels: [],
   },
   {
     id: 5,
     title: 'When Life Gives You Tangerines',
-    image: '/images/hunter.webp',
+    image: '/images/cover.webp',
     progress: 70,
     labels: [],
   },
   {
     id: 6,
     title: 'Brilliant Healers',
-    image: '/images/hunter.webp',
+    image: '/images/cover.webp',
     progress: 0,
     labels: ['New Episode', 'Watch Now'],
   },
   {
     id: 7,
     title: 'Another Show', 
-    image: '/images/hunter.webp',
+    image: '/images/cover.webp',
     progress: 30,
     labels: ['Approved'],
   },
@@ -62,7 +64,8 @@ export default function Home() {
         <meta name="description" content="A basic Netflix-like homepage" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-
+      <Header />
+      <Hero />
       <main>
         <h1 className={styles.sectionTitle}>Таны контент</h1>
         <div className={styles.carousel}>
@@ -77,13 +80,13 @@ export default function Home() {
                 <div className={styles.labelContainer}>
                 {/* Optional: dynamically show the actual label */}
                 {item.labels.includes('Approved') && (
-                    <span className={styles.approvedLabel}>Approved</span>
+                    <span className={styles.approvedLabel}>Зөвшөөрсөн</span>
                 )}
                 {item.labels.includes('In Review') && (
-                    <span className={styles.inReview}>In Review</span>
+                    <span className={styles.inReview}>Шалгагдаж буй</span>
                 )}
                 {item.labels.includes('Rejected') && (
-                    <span className={styles.rejected}>Rejected</span>
+                    <span className={styles.rejected}>Татгалзсан</span>
                 )}
                 </div>
 
@@ -95,13 +98,6 @@ export default function Home() {
                 className={styles.cardImage}
                 priority={true}
                 />
-
-                <div className={styles.progressBarContainer}>
-                <div
-                    className={styles.progressBar}
-                    style={{ width: `${item.progress}%` }}
-                ></div>
-                </div>
             </div>
             ))}
         </div>
@@ -113,7 +109,7 @@ export default function Home() {
             .map((item) => (
             <div key={item.id} className={styles.card}>
                 <div className={styles.labelContainer}>
-                <span className={styles.approvedLabel}>Approved</span>
+                <span className={styles.approvedLabel}>Зөвшөөрсөн</span>
                 </div>
                 <Image
                 src={item.image}
