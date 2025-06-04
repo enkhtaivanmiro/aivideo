@@ -1,4 +1,4 @@
-import styles from '/styles/Signup.module.css';
+import styles from '/styles/SignUp.module.css';
 import Link from 'next/link';
 
 export default function Login() {
