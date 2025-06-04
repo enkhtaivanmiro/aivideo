@@ -81,9 +81,16 @@
   gap: 5px;
   z-index: 20; /* Ensure labels are on top */
 }
-
-.newEpisodeLabel,
-.watchNowLabel {
+.approvedLabel {
+    background-color: rgb(0, 0, 0);
+    color: white;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+.rejected {
   background-color: red;
   color: white;
   padding: 3px 8px;
@@ -93,9 +100,14 @@
   text-transform: uppercase;
 }
 
-.watchNowLabel {
-  background-color: rgba(0, 0, 0, 0.7); 
-  border: 1px solid white; 
+.inReview {
+  background-color: rgba(255, 157, 0, 0.7); 
+  color: white;
+  padding: 3px 8px;
+  border-radius: 3px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  text-transform: uppercase;
 }
 
 @media (max-width: 768px) {
