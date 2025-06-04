@@ -3,6 +3,7 @@ import Head from 'next/head';
 import VideoGallery from '../components/VideoGallery';
 import Preloader from '../components/Preloader';
 import { videos as sampleVideos } from '../lib/videoData';
+import Link from 'next/link';
 
 export default function HomePage() {
   const [loading, setLoading] = useState(true);
@@ -55,9 +56,17 @@ export default function HomePage() {
           Хиймэл оюун ухаан <br />
           <span style={{ color: '#DF3C5F' }}>урласан контент</span>
         </h1>
-        <p style={{ paddingBottom: '6rem', paddingTop: '10px', color: '#8C8D8F' }}>
+        <p style={{ paddingBottom: '4rem', paddingTop: '10px', color: '#8C8D8F' }}>
           Контентыг хурдан хугацаанд зардал багатайгаар
         </p>
+        <div style={{display: 'flex', justifyContent: 'center', marginBottom: '4rem'}}>
+          <Link href="/signup">
+            <button style={{marginRight: '20px', padding: '12px 20px', borderRadius: '10px', border: '0', backgroundColor: 'white', fontSize: '13px', color: '#06090C', fontWeight: 'bold'}}>Бүртгүүлэх</button>
+          </Link>
+          <Link href="/login">
+            <button style={{padding: '12px 29px', borderRadius: '10px', border: '0', backgroundColor: '#DF3C5F', fontSize: '13px', color: 'white', fontWeight: 'bold'}}>Нэвтрэх</button>
+          </Link>
+        </div>
         <div
           style={{
             animation: 'bounceDown 2s infinite',
@@ -106,7 +115,7 @@ export default function HomePage() {
             marginBottom: '40px',
           }}
         >
-          © 2025 Multimedia Enterprise LLC. All rights reserved.
+          © 2025 Multimedia Entertainment LLC. All rights reserved.
         </p>
       </footer>
     </div>
