@@ -8,21 +8,21 @@ const continueWatchingData = [
     title: 'Hunter x Hunter',
     image: '/images/hunter.webp', 
     progress: 80, 
-    labels: [],
+    labels: ['Approved'],
   },
   {
     id: 2,
     title: 'Too Hot To Handle',
     image: '/images/hunter.webp',
     progress: 60,
-    labels: [],
+    labels: ['In Review'],
   },
   {
     id: 3,
     title: 'My Hero Academia',
     image: '/images/hunter.webp',
     progress: 0,
-    labels: ['New Episode', 'Watch Now'],
+    labels: ['Rejected'],
   },
   {
     id: 4,
@@ -50,7 +50,7 @@ const continueWatchingData = [
     title: 'Another Show', 
     image: '/images/hunter.webp',
     progress: 30,
-    labels: [],
+    labels: ['Approved'],
   },
 ];
 
@@ -64,38 +64,74 @@ export default function Home() {
       </Head>
 
       <main>
-        <h1 className={styles.sectionTitle}>Continue Watching for Miro</h1>
-
+        <h1 className={styles.sectionTitle}>Таны контент</h1>
         <div className={styles.carousel}>
-          {continueWatchingData.map((item) => (
+        {continueWatchingData
+            .filter(item =>
+            item.labels.some(label =>
+                ['Approved', 'In Review', 'Rejected'].includes(label)
+            )
+            )
+            .map((item) => (
             <div key={item.id} className={styles.card}>
-              <div className={styles.labelContainer}>
-                {item.labels.includes('New Episode') && (
-                  <span className={styles.newEpisodeLabel}>New Episode</span>
+                <div className={styles.labelContainer}>
+                {/* Optional: dynamically show the actual label */}
+                {item.labels.includes('Approved') && (
+                    <span className={styles.approvedLabel}>Approved</span>
                 )}
-                {item.labels.includes('Watch Now') && (
-                  <span className={styles.watchNowLabel}>Watch Now</span>
+                {item.labels.includes('In Review') && (
+                    <span className={styles.inReview}>In Review</span>
                 )}
-              </div>
-              <Image
+                {item.labels.includes('Rejected') && (
+                    <span className={styles.rejected}>Rejected</span>
+                )}
+                </div>
+
+                <Image
+                src={item.image}
+                alt={item.title}
+                width={250}
+                height={140}
+                className={styles.cardImage}
+                priority={true}
+                />
+
+                <div className={styles.progressBarContainer}>
+                <div
+                    className={styles.progressBar}
+                    style={{ width: `${item.progress}%` }}
+                ></div>
+                </div>
+            </div>
+            ))}
+        </div>
+
+        <h1 className={styles.sectionTitle}>Admin Approved Contents</h1>
+        <div className={styles.carousel}>
+        {continueWatchingData
+            .filter(item => item.labels.includes('Approved'))
+            .map((item) => (
+            <div key={item.id} className={styles.card}>
+                <div className={styles.labelContainer}>
+                <span className={styles.approvedLabel}>Approved</span>
+                </div>
+                <Image
                 src={item.image}
                 alt={item.title}
                 width={250} 
                 height={140} 
                 className={styles.cardImage}
                 priority={true} 
-              />
-              <div className={styles.progressBarContainer}>
+                />
+                <div className={styles.progressBarContainer}>
                 <div
-                  className={styles.progressBar}
-                  style={{ width: `${item.progress}%` }}
+                    className={styles.progressBar}
+                    style={{ width: `${item.progress}%` }}
                 ></div>
-              </div>
+                </div>
             </div>
-          ))}
+            ))}
         </div>
-
-        {/* You can add more sections here following a similar pattern */}
       </main>
     </div>
   );
