@@ -102,3 +102,18 @@
     width: 200px;
   }
 }
+.upload {
+  flex: 0 0 auto;
+  width: 250px; 
+  height: 100%;
+  margin-right: 15px;
+  position: relative;
+  border-radius: 5px;
+  overflow: hidden;
+  background-color: #222;
+  transition: transform 0.2s ease-in-out;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px white solid;
+}

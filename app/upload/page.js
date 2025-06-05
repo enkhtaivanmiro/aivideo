@@ -3,8 +3,8 @@ import jwt from 'jsonwebtoken'
 import { redirect } from 'next/navigation'
 import Image from 'next/image'
 import Header from '../../components/header'
-import Hero from '../../components/hero'
-import styles from '../../styles/Home.module.css'
+import Uploader from '../../components/Uploader'
+import styles from '../../styles/Upload.module.css'
 import Link from 'next/link';
 
 const videoList = [
@@ -29,7 +29,7 @@ const videoList = [
 ]
 
 export const metadata = {
-  title: 'Home',
+  title: 'Upload page',
   description: 'User dashboard page',
 }
 
@@ -47,17 +47,15 @@ export default function HomePage() {
   try {
     user = jwt.verify(token, process.env.JWT_SECRET)
   } catch {
-    // Invalid token — redirect to login
     redirect('/login')
   }
-
-  // You now have a verified user, render the dashboard
 
   return (
     <div className={styles.container}>
       <Header />
-      <Hero />
-      <main>
+      <main className={styles.main}>
+        <Uploader />
+        <>
         <h1 className={styles.sectionTitle}>Таны контент</h1>
         <div className={styles.carousel}>
           <Link href="/upload"><div className={styles.upload}><img src="/upload.svg" alt="Arrow" /></div></Link>
@@ -91,6 +89,7 @@ export default function HomePage() {
               </div>
             ))}
         </div>
+        </>
 
         <h1 className={styles.sectionTitle}>Admin Approved Contents</h1>
         <div className={styles.carousel}>
