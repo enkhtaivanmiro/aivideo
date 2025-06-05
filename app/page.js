@@ -22,7 +22,7 @@ export default function HomePage() {
         className="home-page-main"
         style={{
           textAlign: 'center',
-          backgroundImage: 'url(/Hero-grad.png)',
+          backgroundImage: 'url(/Hero-grad.webp)',
           backgroundRepeat: 'no-repeat',
         }}
       >
