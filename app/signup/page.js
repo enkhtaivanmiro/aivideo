@@ -1,5 +1,7 @@
-import { useState } from "react";
-import styles from '/styles/SignUp.module.css';
+'use client';
+
+import { useState } from 'react';
+import styles from '../../styles/SignUp.module.css';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 
@@ -20,9 +22,9 @@ export default function Signup() {
     const data = await res.json();
 
     if (res.ok) {
-      toast.success('Амжилттай бүртгэгдлээ!'); // Registration successful
+      toast.success('Амжилттай бүртгэгдлээ!');
     } else {
-      toast.error(data.message || 'Алдаа гарлаа'); // Error message
+      toast.error(data.message || 'Алдаа гарлаа');
     }
   };
 

@@ -1,8 +1,10 @@
+'use client';
+
 import { useState } from 'react';
-import styles from '/styles/Login.module.css';
+import styles from '@/styles/Login.module.css';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation'; // ✅ App Router version
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -12,7 +14,6 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Show loading toast
     const toastId = toast.loading('Нэвтэрч байна...');
 
     try {
@@ -26,7 +27,7 @@ export default function Login() {
 
       if (res.ok) {
         toast.success('Амжилттай нэвтэрлээ!', { id: toastId });
-        router.push('/home'); // redirect to homepage
+        router.push('/home'); // App Router push
       } else {
         toast.error(data.message || 'Нэвтрэхэд алдаа гарлаа', { id: toastId });
       }

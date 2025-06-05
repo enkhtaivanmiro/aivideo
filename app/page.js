@@ -1,5 +1,6 @@
+'use client';
+
 import { useEffect, useState } from 'react';
-import Head from 'next/head';
 import VideoGallery from '../components/VideoGallery';
 import Preloader from '../components/Preloader';
 import { videos as sampleVideos } from '../lib/videoData';
@@ -9,7 +10,6 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Show preloader for 1 second, then hide
     const timeout = setTimeout(() => setLoading(false), 1000);
     return () => clearTimeout(timeout);
   }, []);
@@ -18,16 +18,11 @@ export default function HomePage() {
 
   return (
     <div>
-      <Head>
-        <title>My Video Gallery</title>
-        <meta name="description" content="A gallery of cool videos" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
       <main
         className="home-page-main"
         style={{
           textAlign: 'center',
-          backgroundImage: 'url(/Hero-grad.png)',
+          backgroundImage: 'url(/Hero-grad.webp)',
           backgroundRepeat: 'no-repeat',
         }}
       >
@@ -59,20 +54,23 @@ export default function HomePage() {
         <p style={{ paddingBottom: '4rem', paddingTop: '10px', color: '#8C8D8F' }}>
           Контентыг хурдан хугацаанд зардал багатайгаар
         </p>
-        <div style={{display: 'flex', justifyContent: 'center', marginBottom: '4rem'}}>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '4rem' }}>
           <Link href="/signup">
-            <button style={{marginRight: '20px', padding: '12px 20px', borderRadius: '10px', border: '0', backgroundColor: 'white', fontSize: '13px', color: '#06090C', fontWeight: 'bold'}}>Бүртгүүлэх</button>
+            <button style={{ marginRight: '20px', padding: '12px 20px', borderRadius: '10px', border: '0', backgroundColor: 'white', fontSize: '13px', color: '#06090C', fontWeight: 'bold' }}>
+              Бүртгүүлэх
+            </button>
           </Link>
           <Link href="/login">
-            <button style={{padding: '12px 29px', borderRadius: '10px', border: '0', backgroundColor: '#DF3C5F', fontSize: '13px', color: 'white', fontWeight: 'bold'}}>Нэвтрэх</button>
+            <button style={{ padding: '12px 29px', borderRadius: '10px', border: '0', backgroundColor: '#DF3C5F', fontSize: '13px', color: 'white', fontWeight: 'bold' }}>
+              Нэвтрэх
+            </button>
           </Link>
         </div>
         <div
           style={{
             animation: 'bounceDown 2s infinite',
             paddingBottom: '6rem',
-            // Disable animation on mobile
-            animationPlayState: window.innerWidth <= 768 ? 'paused' : 'running',
+            animationPlayState: typeof window !== 'undefined' && window.innerWidth <= 768 ? 'paused' : 'running',
           }}
         >
           <svg
