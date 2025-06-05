@@ -100,9 +100,9 @@ export default function HomePage() {
             marginTop: '20px',
           }}
         >
-          <img src="/logos/gemini.png" alt="Logo 1" style={{ height: '70px' }} />
-          <img src="/logos/chatgpt.png" alt="Logo 2" style={{ height: '70px' }} />
-          <img src="/logos/midjourney.png" alt="Logo 3" style={{ height: '70px' }} />
+          <img src="/logos/gemini.svg" alt="Logo 1" style={{ height: '70px' }} />
+          <img src="/logos/chatgpt.svg" alt="Logo 2" style={{ height: '70px' }} />
+          <img src="/logos/midjourney.svg" alt="Logo 3" style={{ height: '70px' }} />
         </div>
         <p
           style={{
