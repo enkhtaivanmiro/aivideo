@@ -50,7 +50,7 @@ export default function Signup() {
 
         toast.success('Амжилттай бүртгэгдлээ! И-мэйлээ шалган баталгаажуулна уу.', { id: toastId });
 
-        // Send email as username for verification
+        // Navigate to email verification page with username in query
         router.push(`/verification?username=${encodeURIComponent(username)}`);
       });
     },

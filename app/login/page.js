@@ -25,6 +25,7 @@ export default function Login() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
     const toastId = toast.loading('Нэвтэрч байна...');
 
     const user = new CognitoUser({ Username: email, Pool: userPool });
@@ -33,8 +34,7 @@ export default function Login() {
     user.authenticateUser(authDetails, {
       onSuccess: (session) => {
         const token = session.getIdToken().getJwtToken();
-        // You can store this token in localStorage or cookies (ideally on server via API)
-        // localStorage.setItem('token', token);
+        // Ideally store token in HTTP-only cookie from server side
 
         toast.success('Амжилттай нэвтэрлээ!', { id: toastId });
         router.push('/home');
