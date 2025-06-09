@@ -1,38 +1,49 @@
+'use client';
+
 import { useState } from 'react';
-import styles from '/styles/Login.module.css';
+import styles from '@/styles/Login.module.css';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
+import {
+  CognitoUserPool,
+  CognitoUser,
+  AuthenticationDetails,
+} from 'amazon-cognito-identity-js';
+
+const poolData = {
+  UserPoolId: 'ap-northeast-1_WYgTTo7jA',
+  ClientId: '2e3iko2tmgo88146l0sqb0nenm',
+};
+
+const userPool = new CognitoUserPool(poolData);
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const router = useRouter();
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-
-    // Show loading toast
     const toastId = toast.loading('Нэвтэрч байна...');
 
-    try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
+    const user = new CognitoUser({ Username: email, Pool: userPool });
+    const authDetails = new AuthenticationDetails({ Username: email, Password: password });
 
-      const data = await res.json();
+    user.authenticateUser(authDetails, {
+      onSuccess: (session) => {
+        const token = session.getIdToken().getJwtToken();
+        // You can store this token in localStorage or cookies (ideally on server via API)
+        // localStorage.setItem('token', token);
 
-      if (res.ok) {
         toast.success('Амжилттай нэвтэрлээ!', { id: toastId });
-        router.push('/home'); // redirect to homepage
-      } else {
-        toast.error(data.message || 'Нэвтрэхэд алдаа гарлаа', { id: toastId });
-      }
-    } catch (err) {
-      toast.error('Сервертэй холбогдож чадсангүй!', { id: toastId });
-    }
+        router.push('/home');
+      },
+      onFailure: (err) => {
+        console.error('Login error:', err);
+        toast.error(err.message || 'Нэвтрэхэд алдаа гарлаа', { id: toastId });
+      },
+    });
   };
 
   return (

@@ -9,7 +9,7 @@ const VideoGallery = ({ videos, onVideoLoad }) => {
   const trackRef = useRef(null);
   const [isDesktop, setIsDesktop] = useState(false);
 
-  // Detect desktop/mobile
+  // Detect desktop or mobile screen
   useEffect(() => {
     const checkScreenSize = () => {
       setIsDesktop(window.innerWidth > 768);
@@ -19,40 +19,41 @@ const VideoGallery = ({ videos, onVideoLoad }) => {
     return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
 
-  // Handle looping animation only on desktop, disable on mobile
+  // Generate a stable duplicated video list
+  const duplicatedVideos = useMemo(() => {
+    return videos?.map((video, index) => ({
+      ...video,
+      id: `${video.id}-loop-${index}`,
+    })) || [];
+  }, [videos]);
+
+  // Final videos list based on screen size
   const videosToDisplay = useMemo(() => {
-    if (isDesktop && videos && videos.length > 1) {
-      const originalTotalWidth = videos.length * (CARD_WIDTH + CARD_GAP);
-      if (originalTotalWidth > (typeof window !== 'undefined' ? window.innerWidth * 0.8 : 1000)) {
-        const secondSet = videos.map((video) => ({
-          ...video,
-          id: `${video.id}-loop-${Math.random().toString(36).substring(2, 9)}`,
-        }));
-        return [...videos, ...secondSet];
+    if (isDesktop && videos?.length > 1) {
+      const totalWidth = videos.length * (CARD_WIDTH + CARD_GAP);
+      if (typeof window !== 'undefined' && totalWidth > window.innerWidth * 0.8) {
+        return [...videos, ...duplicatedVideos];
       }
     }
     return videos || [];
-  }, [videos, isDesktop]);
+  }, [videos, duplicatedVideos, isDesktop]);
 
+  // Handle scroll animation
   useEffect(() => {
     const currentTrack = trackRef.current;
+    const isLooping = videosToDisplay.length > (videos?.length || 0);
 
-    if (
-      isDesktop &&
-      currentTrack &&
-      videos &&
-      videos.length > 0 &&
-      videosToDisplay.length > videos.length
-    ) {
-      const numOriginalVideos = videos.length;
-      const scrollWidth = numOriginalVideos * (CARD_WIDTH + CARD_GAP);
-
+    if (isDesktop && currentTrack && isLooping) {
+      const scrollWidth = (videos?.length || 0) * (CARD_WIDTH + CARD_GAP);
       currentTrack.style.setProperty('--total-scroll-width', `${scrollWidth}px`);
 
       const animationSpeed = 40;
       const duration = scrollWidth / animationSpeed;
       currentTrack.style.setProperty('--scroll-duration', `${duration}s`);
-      currentTrack.classList.add(styles.animateTrack);
+
+      if (!currentTrack.classList.contains(styles.animateTrack)) {
+        currentTrack.classList.add(styles.animateTrack);
+      }
     } else if (currentTrack) {
       currentTrack.classList.remove(styles.animateTrack);
       currentTrack.style.removeProperty('--total-scroll-width');
@@ -81,7 +82,7 @@ const VideoGallery = ({ videos, onVideoLoad }) => {
             prompt={video.prompt}
             onLoad={onVideoLoad}
             index={idx}
-            isDesktop={isDesktop} // Pass isDesktop for mobile/desktop handling
+            isDesktop={isDesktop}
           />
         ))}
       </div>

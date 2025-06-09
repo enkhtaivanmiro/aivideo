@@ -1,0 +1,125 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import VideoGallery from '../components/VideoGallery';
+import Preloader from '../components/Preloader';
+import { videos as sampleVideos } from '../lib/videoData';
+import Link from 'next/link';
+
+export default function HomePage() {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => setLoading(false), 1000);
+    return () => clearTimeout(timeout);
+  }, []);
+
+  if (loading) return <Preloader />;
+
+  return (
+    <div>
+      <main
+        className="home-page-main"
+        style={{
+          textAlign: 'center',
+          backgroundImage: 'url(/Hero-grad.webp)',
+          backgroundRepeat: 'no-repeat',
+          backgroundPosition: 'top',
+        }}
+      >
+        <div style={{height:'100vh'}}>
+          <header
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              padding: '40px',
+            }}
+          >
+            <h1>Logo</h1>
+            <button
+              style={{
+                padding: '12px 20px',
+                borderRadius: '18px',
+                border: '0',
+                backgroundColor: 'white',
+                fontSize: '13px',
+                color: '#06090C',
+              }}
+            >
+              Холбогдох
+            </button>
+          </header>
+          <h1 className="page-title" style={{ paddingTop: '6rem', fontSize: '64px' }}>
+            Хиймэл оюун ухаан <br />
+            <span style={{ color: '#DF3C5F' }}>урласан контент</span>
+          </h1>
+          <p style={{ paddingBottom: '4rem', paddingTop: '10px', color: '#8C8D8F' }}>
+            Контентыг хурдан хугацаанд зардал багатайгаар
+          </p>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '4rem' }}>
+            <Link href="/signup">
+              <button style={{ marginRight: '20px', padding: '12px 20px', borderRadius: '10px', border: '0', backgroundColor: 'white', fontSize: '13px', color: '#06090C', fontWeight: 'bold' }}>
+                Бүртгүүлэх
+              </button>
+            </Link>
+            <Link href="/login">
+              <button style={{ padding: '12px 29px', borderRadius: '10px', border: '0', backgroundColor: '#DF3C5F', fontSize: '13px', color: 'white', fontWeight: 'bold' }}>
+                Нэвтрэх
+              </button>
+            </Link>
+          </div>
+                  <div
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              gap: '2rem',
+              flexWrap: 'wrap',
+              marginBottom: '40px',
+              marginTop: '20px',
+            }}
+          >
+            <img src="/logos/gemini.svg" alt="Logo 1" style={{ height: '70px' }} />
+            <img src="/logos/chatgpt.svg" alt="Logo 2" style={{ height: '70px' }} />
+            <img src="/logos/midjourney.svg" alt="Logo 3" style={{ height: '70px' }} />
+          </div>
+          <div
+            style={{
+              animation: 'bounceDown 2s infinite',
+              paddingBottom: '6rem',
+              animationPlayState: typeof window !== 'undefined' && window.innerWidth <= 768 ? 'paused' : 'running',
+            }}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="36"
+              height="36"
+              fill="#DF3C5F"
+              viewBox="0 0 24 24"
+            >
+              <path d="M12 16.5l6-6h-4V3h-4v7.5H6l6 6z" />
+            </svg>
+          </div>
+        </div>
+
+          <VideoGallery videos={sampleVideos} />
+      </main>
+      <footer>
+        <p style={{ textAlign: 'center', fontWeight: 'bold', paddingTop: '40px' }}>
+          Powered by:
+        </p>
+        <p
+          style={{
+            padding: '1rem',
+            textAlign: 'center',
+            color: '#8C8D8F',
+            fontWeight: 'bold',
+            marginBottom: '40px',
+          }}
+        >
+          © 2025 Multimedia Entertainment LLC. All rights reserved.
+        </p>
+      </footer>
+    </div>
+  );
+}
