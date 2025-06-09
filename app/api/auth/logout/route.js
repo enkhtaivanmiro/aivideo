@@ -1,9 +1,9 @@
-import cookie from 'cookie';
+import { serialize } from 'cookie';
 
 export async function POST() {
   const headers = new Headers();
 
-  headers.append('Set-Cookie', cookie.serialize('token', '', {
+  headers.append('Set-Cookie', serialize('token', '', {
     httpOnly: true,
     secure: process.env.NODE_ENV !== 'development',
     expires: new Date(0),

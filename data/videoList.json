@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1,
+    "prompt": "Video 1",
+    "image": "/images/cover.webp",
+    "labels": ["Approved"]
+  },
+  {
+    "id": 2,
+    "prompt": "Video 2",
+    "image": "/images/cover.webp",
+    "labels": ["In Review"]
+  },
+  {
+    "id": 3,
+    "prompt": "Video 3",
+    "image": "/images/cover.webp",
+    "labels": ["Rejected"]
+  }
+]
