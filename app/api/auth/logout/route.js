@@ -1,18 +1,18 @@
-import { serialize } from 'cookie';
+import { cookies } from 'next/headers';
 
 export async function POST() {
-  const headers = new Headers();
-
-  headers.append('Set-Cookie', serialize('token', '', {
+  cookies().set({
+    name: 'token',
+    value: '',
     httpOnly: true,
-    secure: process.env.NODE_ENV !== 'development',
-    expires: new Date(0),
+    secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict',
     path: '/',
-  }));
+    maxAge: 0,
+  });
 
-  return new Response(JSON.stringify({ message: 'Logged out' }), {
+  return new Response(JSON.stringify({ message: 'Logged out successfully' }), {
     status: 200,
-    headers,
+    headers: { 'Content-Type': 'application/json' },
   });
 }

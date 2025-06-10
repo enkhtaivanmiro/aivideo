@@ -1,17 +1,9 @@
+import { cookies } from 'next/headers';
 import jwt from 'jsonwebtoken';
 
-export async function GET(req) {
-  const cookieHeader = req.headers.get('cookie') || '';
-  const cookies = Object.fromEntries(
-    cookieHeader
-      .split('; ')
-      .map(cookie => {
-        const [name, ...rest] = cookie.split('=');
-        return [name, rest.join('=')];
-      })
-  );
-
-  const token = cookies.token;
+export async function GET() {
+  const cookieStore = cookies();
+  const token = cookieStore.get('token')?.value;
 
   if (!token) {
     return new Response(JSON.stringify({ user: null }), { status: 401 });

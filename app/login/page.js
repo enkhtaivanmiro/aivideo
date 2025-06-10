@@ -5,45 +5,49 @@ import styles from '@/styles/Login.module.css';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
-import {
-  CognitoUserPool,
-  CognitoUser,
-  AuthenticationDetails,
-} from 'amazon-cognito-identity-js';
-
-const poolData = {
-  UserPoolId: 'ap-northeast-1_WYgTTo7jA',
-  ClientId: '2e3iko2tmgo88146l0sqb0nenm',
-};
-
-const userPool = new CognitoUserPool(poolData);
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
+    if (isSubmitting) return;
+    
+    setIsSubmitting(true);
     const toastId = toast.loading('Нэвтэрч байна...');
 
-    const user = new CognitoUser({ Username: email, Pool: userPool });
-    const authDetails = new AuthenticationDetails({ Username: email, Password: password });
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+        credentials: 'include'
+      });
 
-    user.authenticateUser(authDetails, {
-      onSuccess: (session) => {
-        const token = session.getIdToken().getJwtToken();
-        // Ideally store token in HTTP-only cookie from server side
+      const data = await res.json();
 
-        toast.success('Амжилттай нэвтэрлээ!', { id: toastId });
-        router.push('/home');
-      },
-      onFailure: (err) => {
-        console.error('Login error:', err);
-        toast.error(err.message || 'Нэвтрэхэд алдаа гарлаа', { id: toastId });
-      },
-    });
+      if (!res.ok) {
+        throw new Error(data.message || 'Нэвтрэхэд алдаа гарлаа');
+      }
+
+      // Store token in sessionStorage for immediate client-side access
+      if (data.token) {
+        sessionStorage.setItem('authToken', data.token);
+      }
+
+      toast.success('Амжилттай нэвтэрлээ!', { id: toastId });
+      
+      // Force full page reload to ensure middleware picks up the cookie
+      window.location.href = '/home';
+    } catch (err) {
+      toast.error(err.message, { id: toastId });
+      setPassword('');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -60,6 +64,7 @@ export default function Login() {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            disabled={isSubmitting}
           />
           <input
             type="password"
@@ -67,21 +72,28 @@ export default function Login() {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            disabled={isSubmitting}
           />
-          <button type="submit" className={styles.submitBtn}>Нэвтрэх</button>
+          <button 
+            type="submit" 
+            className={styles.submitBtn}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Нэвтэрч байна...' : 'Нэвтрэх'}
+          </button>
         </form>
 
-        <button className={styles.socialBtn} style={{ marginTop: '20px' }}>
+        <button className={styles.socialBtn} style={{ marginTop: '20px' }} disabled={isSubmitting}>
           <img src="/google-icon.svg" alt="Google" />
           Sign in with Google
         </button>
 
-        <button className={styles.socialBtn}>
+        <button className={styles.socialBtn} disabled={isSubmitting}>
           <img src="/facebook-icon.svg" alt="Facebook" />
           Sign in with Facebook
         </button>
 
-        <button className={styles.socialBtn}>
+        <button className={styles.socialBtn} disabled={isSubmitting}>
           <img src="/apple-icon.svg" alt="Apple" />
           Sign in with Apple
         </button>

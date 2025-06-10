@@ -1,11 +1,11 @@
-import { cookies } from 'next/headers'
-import jwt from 'jsonwebtoken'
-import { redirect } from 'next/navigation'
-import Image from 'next/image'
-import Header from '../../components/header'
-import Hero from '../../components/hero'
-import styles from '../../styles/Home.module.css'
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
+import Image from 'next/image';
+import Header from '../../components/header';
+import Hero from '../../components/hero';
+import styles from '../../styles/Home.module.css';
 import Link from 'next/link';
+import { verifyToken } from '../../lib/auth'; // centralized JWT verification
 
 const videoList = [
   {
@@ -26,41 +26,41 @@ const videoList = [
     image: '/images/cover.webp',
     labels: ['Rejected'],
   },
-]
+];
 
 export const metadata = {
   title: 'Home',
   description: 'User dashboard page',
-}
+};
 
-export default function HomePage() {
-  // Get cookies on server side
-  const cookieStore = cookies()
-  const token = cookieStore.get('token')?.value
+export default async function HomePage() {
+  const cookieStore = cookies();
+  const token = cookieStore.get('token')?.value;
 
   if (!token) {
-    // No token — redirect to login
-    redirect('/login')
+    redirect('/login');
   }
 
-  let user
+  let user;
   try {
-    user = jwt.verify(token, process.env.JWT_SECRET)
-  } catch {
-    // Invalid token — redirect to login
-    redirect('/login')
+    user = await verifyToken(token);
+  } catch (err) {
+    console.error('Token verification failed:', err);
+    redirect('/login');
   }
-
-  // You now have a verified user, render the dashboard
 
   return (
     <div className={styles.container}>
-      <Header />
+      <Header user={user} />
       <Hero />
       <main>
         <h1 className={styles.sectionTitle}>Таны контент</h1>
         <div className={styles.carousel}>
-          <Link href="/upload"><div className={styles.upload}><img src="/upload.svg" alt="Arrow" /></div></Link>
+          <Link href="/upload">
+            <div className={styles.upload}>
+              <img src="/upload.svg" alt="Arrow" />
+            </div>
+          </Link>
           {videoList
             .filter(item =>
               item.labels.some(label =>
@@ -112,13 +112,13 @@ export default function HomePage() {
                 <div className={styles.progressBarContainer}>
                   <div
                     className={styles.progressBar}
-                    style={{ width: `${item.progress}%` }}
-                  ></div>
+                    style={{ width: `${item.progress || 0}%` }}
+                  />
                 </div>
               </div>
             ))}
         </div>
       </main>
     </div>
-  )
+  );
 }
