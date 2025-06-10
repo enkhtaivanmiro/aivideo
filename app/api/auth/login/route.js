@@ -1,6 +1,6 @@
 import { CognitoUser, AuthenticationDetails } from 'amazon-cognito-identity-js';
 import { userPool } from '@/lib/cognito';
-import { cookies } from 'next/headers';
+import { serialize } from 'cookie';
 
 export async function POST(req) {
   try {
@@ -23,9 +23,8 @@ export async function POST(req) {
 
     const token = session.getIdToken().getJwtToken();
 
-    cookies().set({
-      name: 'token',
-      value: token,
+    // Serialize the cookie properly
+    const cookie = serialize('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
@@ -35,7 +34,10 @@ export async function POST(req) {
 
     return new Response(JSON.stringify({ message: 'Logged in successfully' }), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Set-Cookie': cookie,
+      },
     });
   } catch (error) {
     console.error('Login error:', error);
