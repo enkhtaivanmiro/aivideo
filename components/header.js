@@ -68,9 +68,9 @@ const Header = () => {
           </div>
           {isDropdownOpen && (
             <div className={styles.dropdownContent}>
-              <a href="#">Профайл</a>
-              <a href="#">Тохиргоо</a>
-              <a href="#" onClick={handleLogout}>Гарах</a>
+              <Link href="/profile">Профайл</Link>
+              <Link href="/settings">Тохиргоо</Link>
+              <Link href="/login" onClick={handleLogout}>Гарах</Link>
             </div>
           )}
         </div>

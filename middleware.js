@@ -50,7 +50,7 @@ export async function middleware(req) {
   const token = req.cookies.get('token')?.value || null;
 
   const isPublic = ['/login', '/signup'].some(path => pathname.startsWith(path));
-  const isProtected = ['/home'].some(path => pathname.startsWith(path));
+  const isProtected = ['/home', '/upload', '/profile', '/settings'].some(path => pathname.startsWith(path));
 
   const isValid = token && await verifyToken(token);
 
@@ -75,5 +75,5 @@ export async function middleware(req) {
 }
 
 export const config = {
-  matcher: ['/home', '/login', '/signup'],
+  matcher: ['/home', '/login', '/signup', '/upload'],
 };
