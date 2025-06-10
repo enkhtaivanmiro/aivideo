@@ -1,0 +1,161 @@
+/* Profile.module.css */
+
+.container {
+  min-height: 100vh;
+  margin-top: 10vh;
+}
+
+.wrapper {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+/* Profile Header */
+.profileHeader {
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background-color: #e2e8f0;
+  margin: 0 auto 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  color: #ffffff;
+}
+
+.name {
+  margin: 0 0 0.5rem;
+  font-size: 2rem;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.title {
+  margin: 0 0 1rem;
+  color: #ffffff;
+  font-size: 1.1rem;
+}
+
+.location {
+  margin: 0;
+  color: #ffffff;
+  font-size: 0.9rem;
+}
+
+/* Stats Section */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.statCard {
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.statNumber {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.statNumber.blue {
+  color: #3b82f6;
+}
+
+.statNumber.green {
+  color: #10b981;
+}
+
+.statNumber.orange {
+  color: #f59e0b;
+}
+
+.statLabel {
+  color: #ffffff;
+  font-size: 0.9rem;
+}
+
+/* Section Styles */
+.section {
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+
+.section:last-child {
+  margin-bottom: 0;
+}
+
+.sectionTitle {
+  margin: 0 0 1rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #a5b9d6;
+}
+
+.aboutText {
+  margin: 0;
+  line-height: 1.6;
+  color: #95a7c1;
+}
+
+/* Contact Section */
+.contactGrid {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.contactItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.contactIcon {
+  font-size: 1.2rem;
+}
+
+.contactText {
+  color: #95a7c1;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .wrapper {
+    padding: 1rem;
+  }
+  
+  .profileHeader {
+    padding: 1.5rem;
+  }
+  
+  .section {
+    padding: 1.5rem;
+  }
+  
+  .name {
+    font-size: 1.75rem;
+  }
+  
+  .avatar {
+    width: 100px;
+    height: 100px;
+    font-size: 2.5rem;
+  }
+}
