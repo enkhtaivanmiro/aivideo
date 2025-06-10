@@ -7,40 +7,41 @@ export async function POST(req) {
     const body = await req.json();
     const { email, password } = body;
 
-    const user = new CognitoUser({
-      Username: email,
-      Pool: userPool,
-    });
+    if (!email || !password) {
+      return new Response(JSON.stringify({ message: 'Email and password are required' }), { status: 400 });
+    }
 
-    const authDetails = new AuthenticationDetails({
-      Username: email,
-      Password: password,
-    });
+    const user = new CognitoUser({ Username: email, Pool: userPool });
+    const authDetails = new AuthenticationDetails({ Username: email, Password: password });
 
     const session = await new Promise((resolve, reject) => {
       user.authenticateUser(authDetails, {
-        onSuccess: (session) => resolve(session),
-        onFailure: (err) => reject(err),
+        onSuccess: resolve,
+        onFailure: reject,
       });
     });
 
     const token = session.getIdToken().getJwtToken();
 
-    cookies().set('token', token, {
+    cookies().set({
+      name: 'token',
+      value: token,
       httpOnly: true,
-      secure: process.env.NODE_ENV !== 'development',
+      secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
       path: '/',
-      maxAge: 60 * 60 * 24 * 7,
+      maxAge: 60 * 60 * 24 * 7, // 1 week
     });
 
     return new Response(JSON.stringify({ message: 'Logged in successfully' }), {
       status: 200,
+      headers: { 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    console.error(error);
-    return new Response(JSON.stringify({ message: 'Invalid email or password' }), {
+    console.error('Login error:', error);
+    return new Response(JSON.stringify({ message: error.message || 'Login failed' }), {
       status: 401,
+      headers: { 'Content-Type': 'application/json' },
     });
   }
 }

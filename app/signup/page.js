@@ -5,17 +5,6 @@ import { useRouter } from 'next/navigation';
 import styles from '../../styles/SignUp.module.css';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
-import {
-  CognitoUserPool,
-  CognitoUserAttribute,
-} from 'amazon-cognito-identity-js';
-
-const poolData = {
-  UserPoolId: 'ap-northeast-1_WYgTTo7jA',
-  ClientId: '2e3iko2tmgo88146l0sqb0nenm',
-};
-
-const userPool = new CognitoUserPool(poolData);
 
 export default function Signup() {
   const [email, setEmail] = useState('');
@@ -24,37 +13,38 @@ export default function Signup() {
   const router = useRouter();
 
   const handleSubmit = useCallback(
-    (e) => {
+    async (e) => {
       e.preventDefault();
+      if (loading) return;
+
       setLoading(true);
       const toastId = toast.loading('Бүртгүүлж байна...');
 
-      // Use email as username
-      const username = email;
+      try {
+        const res = await fetch('/api/auth/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        });
 
-      // Add email as a user attribute
-      const attributeList = [
-        new CognitoUserAttribute({
-          Name: 'email',
-          Value: email,
-        }),
-      ];
+        const data = await res.json();
 
-      userPool.signUp(username, password, attributeList, null, (err, result) => {
-        setLoading(false);
-        if (err) {
-          console.error(err);
-          toast.error(err.message || 'Бүртгэхэд алдаа гарлаа', { id: toastId });
-          return;
+        if (!res.ok) {
+          throw new Error(data.message || 'Бүртгэхэд алдаа гарлаа');
         }
 
-        toast.success('Амжилттай бүртгэгдлээ! И-мэйлээ шалган баталгаажуулна уу.', { id: toastId });
-
-        // Navigate to email verification page with username in query
-        router.push(`/verification?username=${encodeURIComponent(username)}`);
-      });
+        toast.success(
+          'Амжилттай бүртгэгдлээ! И-мэйлээ шалган баталгаажуулна уу.',
+          { id: toastId }
+        );
+        router.push(`/verification?username=${encodeURIComponent(email)}`);
+      } catch (err) {
+        toast.error(err.message || 'Алдаа гарлаа', { id: toastId });
+      } finally {
+        setLoading(false);
+      }
     },
-    [email, password, router]
+    [email, password, router, loading]
   );
 
   return (
