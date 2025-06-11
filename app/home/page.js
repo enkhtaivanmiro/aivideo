@@ -1,11 +1,12 @@
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
+// app/home/page.js
+'use client';
+
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Header from '../../components/header';
 import Hero from '../../components/hero';
 import styles from '../../styles/Home.module.css';
 import Link from 'next/link';
-import { verifyToken } from '../../lib/auth'; // centralized JWT verification
 
 const videoList = [
   {
@@ -28,25 +29,58 @@ const videoList = [
   },
 ];
 
-export const metadata = {
-  title: 'Home',
-  description: 'User dashboard page',
-};
+export default function HomePage() {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-export default async function HomePage() {
-  const cookieStore = cookies();
-  const token = cookieStore.get('token')?.value;
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        console.log('HomePage: Fetching user data');
+        
+        const { getCurrentUser, fetchUserAttributes } = await import('aws-amplify/auth');
+        
+        const currentUser = await getCurrentUser();
+        console.log('HomePage: Authenticated user:', currentUser.username);
+        
+        const attributes = await fetchUserAttributes();
+        console.log('HomePage: User attributes:', attributes);
+        
+        // Convert attributes to the expected format
+        const userData = Object.keys(attributes).reduce((acc, key) => {
+          const cleanKey = key.replace('custom:', '');
+          acc[cleanKey] = attributes[key];
+          return acc;
+        }, {});
+        
+        // Add username from getCurrentUser
+        userData.username = currentUser.username;
+        
+        console.log('HomePage: Processed user data:', userData);
+        setUser(userData);
+      } catch (error) {
+        console.error('HomePage: Failed to fetch user data:', error);
+        // Don't redirect here - AuthGuard will handle authentication
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  if (!token) {
-    redirect('/login');
-  }
+    fetchUserData();
+  }, []);
 
-  let user;
-  try {
-    user = await verifyToken(token);
-  } catch (err) {
-    console.error('Token verification failed:', err);
-    redirect('/login');
+  if (loading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh',
+        color: 'white'
+      }}>
+        Loading user data...
+      </div>
+    );
   }
 
   return (
@@ -62,19 +96,19 @@ export default async function HomePage() {
             </div>
           </Link>
           {videoList
-            .filter(item =>
-              item.labels.some(label =>
+            .filter((item) =>
+              item.labels.some((label) =>
                 ['Approved', 'In Review', 'Rejected'].includes(label)
               )
             )
-            .map(item => (
+            .map((item) => (
               <div key={item.id} className={styles.card}>
                 <div className={styles.labelContainer}>
                   {item.labels.includes('Approved') && (
                     <span className={styles.approvedLabel}>Зөвшөөрсөн</span>
                   )}
                   {item.labels.includes('In Review') && (
-                    <span className={styles.inReview}>Шалгагдаж буй</span>
+                    <span className={styles.inReview}>Шалгаждаж буй</span>
                   )}
                   {item.labels.includes('Rejected') && (
                     <span className={styles.rejected}>Татгалзсан</span>
@@ -95,8 +129,8 @@ export default async function HomePage() {
         <h1 className={styles.sectionTitle}>Admin Approved Contents</h1>
         <div className={styles.carousel}>
           {videoList
-            .filter(item => item.labels.includes('Approved'))
-            .map(item => (
+            .filter((item) => item.labels.includes('Approved'))
+            .map((item) => (
               <div key={item.id} className={styles.card}>
                 <div className={styles.labelContainer}>
                   <span className={styles.approvedLabel}>Зөвшөөрсөн</span>
