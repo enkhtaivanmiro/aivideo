@@ -1,12 +1,12 @@
+// app/login/page.js - Simplified login page
 'use client';
 
 import { useState } from 'react';
-import styles from '@/styles/Login.module.css';
-import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
+import styles from '../../styles/Login.module.css';
 
-export default function Login() {
+export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -15,37 +15,68 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isSubmitting) return;
-    
     setIsSubmitting(true);
+
     const toastId = toast.loading('Нэвтэрч байна...');
 
     try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-        credentials: 'include'
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message || 'Нэвтрэхэд алдаа гарлаа');
-      }
-
-      // Store token in sessionStorage for immediate client-side access
-      if (data.token) {
-        sessionStorage.setItem('authToken', data.token);
-      }
-
-      toast.success('Амжилттай нэвтэрлээ!', { id: toastId });
+      const { signIn } = await import('aws-amplify/auth');
       
-      // Force full page reload to ensure middleware picks up the cookie
-      window.location.href = '/home';
+      console.log('Attempting signIn with:', email);
+      
+      const { isSignedIn, nextStep } = await signIn({
+        username: email,
+        password: password,
+      });
+      
+      console.log('SignIn result:', { isSignedIn, nextStep });
+      
+      if (isSignedIn) {
+        toast.success('Амжилттай нэвтэрлээ!', { id: toastId });
+        // Use window.location for a hard redirect to ensure auth state is properly updated
+        window.location.href = '/home';
+      } else if (nextStep) {
+        console.log('Additional step required:', nextStep);
+        toast.error('Additional authentication step required', { id: toastId });
+      }
     } catch (err) {
-      toast.error(err.message, { id: toastId });
-      setPassword('');
+      console.error('SignIn error:', err);
+      let errorMessage = 'Нэвтрэхэд алдаа гарлаа';
+      
+      // Handle specific error cases
+      if (err.name === 'UserNotConfirmedException') {
+        errorMessage = 'Please confirm your email address';
+      } else if (err.name === 'NotAuthorizedException') {
+        errorMessage = 'Incorrect username or password';
+      } else if (err.name === 'UserNotFoundException') {
+        errorMessage = 'User not found';
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
+      toast.error(errorMessage, { id: toastId });
     } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleOAuthLogin = async (provider) => {
+    setIsSubmitting(true);
+    const toastId = toast.loading('OAuth нэвтрэл эхэлж байна...');
+    
+    try {
+      const { signInWithRedirect } = await import('aws-amplify/auth');
+      console.log('Attempting OAuth login with:', provider);
+      
+      await signInWithRedirect({
+        provider: provider.toLowerCase()
+      });
+      
+      // Note: signInWithRedirect will redirect the page, so this might not execute
+      toast.success('Амжилттай нэвтэрлээ!', { id: toastId });
+    } catch (err) {
+      console.error('OAuth login error:', err);
+      toast.error('OAuth нэвтрэхэд алдаа гарлаа: ' + err.message, { id: toastId });
       setIsSubmitting(false);
     }
   };
@@ -74,8 +105,8 @@ export default function Login() {
             onChange={(e) => setPassword(e.target.value)}
             disabled={isSubmitting}
           />
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             className={styles.submitBtn}
             disabled={isSubmitting}
           >
@@ -83,23 +114,36 @@ export default function Login() {
           </button>
         </form>
 
-        <button className={styles.socialBtn} style={{ marginTop: '20px' }} disabled={isSubmitting}>
+        <button
+          className={styles.socialBtn}
+          style={{ marginTop: '20px' }}
+          onClick={() => handleOAuthLogin('Google')}
+          disabled={isSubmitting}
+        >
           <img src="/google-icon.svg" alt="Google" />
           Sign in with Google
         </button>
 
-        <button className={styles.socialBtn} disabled={isSubmitting}>
+        <button
+          className={styles.socialBtn}
+          onClick={() => handleOAuthLogin('Facebook')}
+          disabled={isSubmitting}
+        >
           <img src="/facebook-icon.svg" alt="Facebook" />
           Sign in with Facebook
         </button>
 
-        <button className={styles.socialBtn} disabled={isSubmitting}>
+        <button
+          className={styles.socialBtn}
+          onClick={() => handleOAuthLogin('SignInWithApple')}
+          disabled={isSubmitting}
+        >
           <img src="/apple-icon.svg" alt="Apple" />
           Sign in with Apple
         </button>
 
         <p className={styles.loginText}>
-          Бүртгэлгүй юу? <Link href="/signup">Бүртгүүлэх</Link>
+          Бүртгэлгүй юу? <a href="/signup">Бүртгүүлэх</a>
         </p>
       </div>
     </div>
