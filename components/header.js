@@ -8,8 +8,8 @@ import toast from 'react-hot-toast';
 import { CognitoUserPool } from 'amazon-cognito-identity-js';
 
 const poolData = {
-  UserPoolId: 'ap-northeast-1_WYgTTo7jA', // replace with your actual pool ID
-  ClientId: '2e3iko2tmgo88146l0sqb0nenm', // replace with your actual client ID
+  UserPoolId: 'ap-northeast-1_WYgTTo7jA',
+  ClientId: '2e3iko2tmgo88146l0sqb0nenm',
 };
 const userPool = new CognitoUserPool(poolData);
 
@@ -17,29 +17,29 @@ const Header = () => {
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const router = useRouter();
 
-  const handleLogout = async (e) => {
-    e.preventDefault();
-
-    const toastId = toast.loading('Гарч байна...');
-
-    // Clear Cognito session on client
-    const cognitoUser = userPool.getCurrentUser();
-    if (cognitoUser) {
-      cognitoUser.signOut();
-    }
-
+  const handleLogout = async () => {
     try {
-      const res = await fetch('/api/auth/logout', { method: 'POST' });
-
-      if (res.ok) {
-        toast.success('Амжилттай гарлаа!', { id: toastId });
-        router.push('/login');
-      } else {
-        throw new Error('Logout failed');
-      }
+      const { signOut } = await import('aws-amplify/auth');
+      
+      await signOut();
+      
+      console.log('Successfully signed out from AWS Amplify');
     } catch (error) {
-      toast.error(error.message || 'Гарахад алдаа гарлаа', { id: toastId });
+      console.error('Error signing out from AWS Amplify:', error);
     }
+    
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('authToken');
+    
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('user');
+    sessionStorage.removeItem('authToken');
+    
+    document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    document.cookie = 'authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    
+    window.location.href = '/';
   };
 
   return (
@@ -70,7 +70,9 @@ const Header = () => {
             <div className={styles.dropdownContent}>
               <Link href="/profile">Профайл</Link>
               <Link href="/settings">Тохиргоо</Link>
-              <Link href="/login" onClick={handleLogout}>Гарах</Link>
+              <button onClick={handleLogout} className={styles.logoutButton}>
+                Гарах
+              </button>
             </div>
           )}
         </div>

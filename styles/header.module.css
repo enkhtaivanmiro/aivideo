@@ -84,6 +84,7 @@
 
 .dropdownContent a:hover {
   background-color: #f1f1f1;
+  color: black;
 }
 
 .dropdownContainer {
@@ -93,4 +94,21 @@
 
 .avatarWrapper {
   display: inline-block; 
+}
+
+.logoutButton {
+  background: none;
+  border: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+  width: 100%;
+  padding: 12px 16px;
+}
+
+.logoutButton:hover {
+  background-color: #f1f1f1;
+  color: black;
 }
