@@ -21,31 +21,78 @@ export default function Signup() {
       const toastId = toast.loading('Бүртгүүлж байна...');
 
       try {
-        const res = await fetch('/api/auth/signup', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password }),
+        const { signUp } = await import('aws-amplify/auth');
+        
+        console.log('Attempting signUp with:', email);
+        
+        const { isSignUpComplete, userId, nextStep } = await signUp({
+          username: email,
+          password: password,
+          options: {
+            userAttributes: {
+              email: email,
+            },
+          },
         });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-          throw new Error(data.message || 'Бүртгэхэд алдаа гарлаа');
+        
+        console.log('SignUp result:', { isSignUpComplete, userId, nextStep });
+        
+        if (nextStep?.signUpStep === 'CONFIRM_SIGN_UP') {
+          toast.success(
+            'Амжилттай бүртгэгдлээ! И-мэйлээ шалган баталгаажуулна уу.',
+            { id: toastId }
+          );
+          router.push(`/verification?username=${encodeURIComponent(email)}`);
+        } else if (isSignUpComplete) {
+          toast.success('Амжилттай бүртгэгдлээ!', { id: toastId });
+          router.push('/login');
+        } else {
+          console.log('Unexpected signup result:', { isSignUpComplete, nextStep });
+          toast.error('Бүртгэхэд алдаа гарлаа', { id: toastId });
         }
-
-        toast.success(
-          'Амжилттай бүртгэгдлээ! И-мэйлээ шалган баталгаажуулна уу.',
-          { id: toastId }
-        );
-        router.push(`/verification?username=${encodeURIComponent(email)}`);
       } catch (err) {
-        toast.error(err.message || 'Алдаа гарлаа', { id: toastId });
+        console.error('SignUp error:', err);
+        let errorMessage = 'Бүртгэхэд алдаа гарлаа';
+        
+        // Handle specific error cases
+        if (err.name === 'UsernameExistsException') {
+          errorMessage = 'Энэ и-мэйл хаяг аль хэдийн бүртгэгдсэн байна';
+        } else if (err.name === 'InvalidPasswordException') {
+          errorMessage = 'Нууц үг хангалттай хүчтэй биш байна';
+        } else if (err.name === 'InvalidParameterException') {
+          errorMessage = 'И-мэйл хаяг буруу форматтай байна';
+        } else if (err.message) {
+          errorMessage = err.message;
+        }
+        
+        toast.error(errorMessage, { id: toastId });
       } finally {
         setLoading(false);
       }
     },
     [email, password, router, loading]
   );
+
+  const handleOAuthSignUp = async (provider) => {
+    setLoading(true);
+    const toastId = toast.loading('OAuth бүртгэл эхэлж байна...');
+    
+    try {
+      const { signInWithRedirect } = await import('aws-amplify/auth');
+      console.log('Attempting OAuth signup with:', provider);
+      
+      await signInWithRedirect({
+        provider: provider.toLowerCase()
+      });
+      
+      // Note: signInWithRedirect will redirect the page, so this might not execute
+      toast.success('Амжилттай бүртгэгдлээ!', { id: toastId });
+    } catch (err) {
+      console.error('OAuth signup error:', err);
+      toast.error('OAuth бүртгэхэд алдаа гарлаа: ' + err.message, { id: toastId });
+      setLoading(false);
+    }
+  };
 
   return (
     <div className={styles.container}>
@@ -60,6 +107,7 @@ export default function Signup() {
             placeholder="name@domain.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            disabled={loading}
             required
           />
           <input
@@ -67,24 +115,42 @@ export default function Signup() {
             placeholder="12345678"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            disabled={loading}
             required
           />
-          <button type="submit" disabled={loading} className={styles.submitBtn}>
+          <button 
+            type="submit" 
+            disabled={loading} 
+            className={styles.submitBtn}
+          >
             {loading ? 'Түр хүлээнэ үү...' : 'Бүртгүүлэх'}
           </button>
         </form>
 
-        <button className={styles.socialBtn} style={{ marginTop: '20px' }}>
+        <button 
+          className={styles.socialBtn} 
+          style={{ marginTop: '20px' }}
+          onClick={() => handleOAuthSignUp('Google')}
+          disabled={loading}
+        >
           <img src="/google-icon.svg" alt="Google" />
           Sign up with Google
         </button>
 
-        <button className={styles.socialBtn}>
+        <button 
+          className={styles.socialBtn}
+          onClick={() => handleOAuthSignUp('Facebook')}
+          disabled={loading}
+        >
           <img src="/facebook-icon.svg" alt="Facebook" />
           Sign up with Facebook
         </button>
 
-        <button className={styles.socialBtn}>
+        <button 
+          className={styles.socialBtn}
+          onClick={() => handleOAuthSignUp('SignInWithApple')}
+          disabled={loading}
+        >
           <img src="/apple-icon.svg" alt="Apple" />
           Sign up with Apple
         </button>
