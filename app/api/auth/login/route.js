@@ -4,8 +4,7 @@ import { serialize } from 'cookie';
 
 export async function POST(req) {
   try {
-    const body = await req.json();
-    const { email, password } = body;
+    const { email, password } = await req.json();
 
     if (!email || !password) {
       return new Response(JSON.stringify({ message: 'Email and password are required' }), { status: 400 });
@@ -21,24 +20,28 @@ export async function POST(req) {
       });
     });
 
-    const token = session.getIdToken().getJwtToken();
-
-    // Serialize the cookie properly
-    const cookie = serialize('token', token, {
+    const cookieOptions = {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
       path: '/',
-      maxAge: 60 * 60 * 24 * 7, // 1 week
-    });
+      maxAge: 60 * 60 * 24 * 7,
+    };
+
+    const cookies = [
+      serialize('idToken', idToken, cookieOptions),
+      serialize('accessToken', accessToken, cookieOptions),
+      serialize('refreshToken', refreshToken, cookieOptions),
+    ];
 
     return new Response(JSON.stringify({ message: 'Logged in successfully' }), {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
-        'Set-Cookie': cookie,
+        'Set-Cookie': cookies.join(','),
       },
     });
+
   } catch (error) {
     console.error('Login error:', error);
     return new Response(JSON.stringify({ message: error.message || 'Login failed' }), {

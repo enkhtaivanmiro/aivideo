@@ -1,35 +1,71 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import styles from '../../styles/admin.module.css';
 
+function parseJwt(token) {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    return JSON.parse(jsonPayload);
+  } catch {
+    return null;
+  }
+}
+
 export default function AdminPage() {
+  const router = useRouter();
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch videos (replace with real API)
+    const accessToken = localStorage.getItem('accessToken') || '';
+
+    const payload = parseJwt(accessToken);
+
+    if (!payload || !payload['cognito:groups']?.includes('Admin')) {
+      router.replace('/home');
+      return;
+    }
+
     async function fetchVideos() {
-      const res = await fetch('/api/admin/videos'); // Fake endpoint
-      const data = await res.json();
-      setVideos(data);
-      setLoading(false);
+      try {
+        const res = await fetch('/api/videos');
+        if (!res.ok) throw new Error('Failed to fetch videos');
+        const data = await res.json();
+        setVideos(data);
+      } catch (error) {
+        alert('Error loading videos: ' + error.message);
+      } finally {
+        setLoading(false);
+      }
     }
 
     fetchVideos();
-  }, []);
+  }, [router]);
 
-  const handleAction = async (videoId, action) => {
-    const res = await fetch(`/api/admin/videos/${videoId}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action }),
-    });
+  const handleAction = async (videoKey, action) => {
+    try {
+      const res = await fetch(`/api/videos/${encodeURIComponent(videoKey)}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action }),
+      });
 
-    if (res.ok) {
-      setVideos((prev) => prev.filter((v) => v.id !== videoId));
-    } else {
-      alert('Action failed');
+      if (res.ok) {
+        setVideos((prev) => prev.filter((v) => v.key !== videoKey));
+      } else {
+        alert('Action failed');
+      }
+    } catch (error) {
+      alert('Network error: ' + error.message);
     }
   };
 
@@ -43,12 +79,22 @@ export default function AdminPage() {
       ) : (
         <div className={styles.videoGrid}>
           {videos.map((video) => (
-            <div key={video.id} className={styles.card}>
+            <div key={video.key} className={styles.card}>
               <video src={video.url} controls className={styles.video}></video>
-              <p>{video.title}</p>
+              <p>{video.key.split('/').pop()}</p>
               <div className={styles.actions}>
-                <button onClick={() => handleAction(video.id, 'accept')}>Accept</button>
-                <button onClick={() => handleAction(video.id, 'reject')}>Reject</button>
+                <button
+                  className={`${styles.button} ${styles.accept}`}
+                  onClick={() => handleAction(video.key, 'accept')}
+                >
+                  Accept
+                </button>
+                <button
+                  className={`${styles.button} ${styles.reject}`}
+                  onClick={() => handleAction(video.key, 'reject')}
+                >
+                  Reject
+                </button>
               </div>
             </div>
           ))}

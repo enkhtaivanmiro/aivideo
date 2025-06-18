@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true, // optional
+  reactStrictMode: true, 
   experimental: {
     serverActions: {
       enabled: true,

@@ -57,7 +57,6 @@ export default function HomePage() {
           </Link>
           <Link href="/admin">
                       <div className={styles.upload}>
-              <img src="/upload.svg" alt="Upload" />
             </div>
           </Link>
 

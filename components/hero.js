@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from '../styles/hero.module.css'; // Create this CSS file
+import styles from '../styles/hero.module.css'; 
 import Link from 'next/link';
 
 const Header = () => {

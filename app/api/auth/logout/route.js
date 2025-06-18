@@ -6,7 +6,7 @@ export async function POST() {
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict',
     path: '/',
-    maxAge: 0, 
+    maxAge: 0,
   });
 
   return new Response(JSON.stringify({ message: 'Logged out successfully' }), {
