@@ -1,53 +1,68 @@
-"use client";
-import { useState } from "react";
-import styles from "../styles/Uploader.module.css";
+'use client'
+
+import { useState } from 'react'
+import styles from '../styles/Uploader.module.css'
 
 export default function Uploader() {
-  const [prompt, setPrompt] = useState("");
-  const [video, setVideo] = useState(null);
+  const [prompt, setPrompt] = useState('')
+  const [videoFile, setVideoFile] = useState(null)
+  const [uploading, setUploading] = useState(false)
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault()
+    if (!videoFile || !prompt) return alert('Missing prompt or video.')
 
-    if (!prompt || !video) {
-      alert("Please provide a prompt and select a video.");
-      return;
-    }
+    setUploading(true)
 
-    const formData = new FormData();
-    formData.append("prompt", prompt);
-    formData.append("video", video);
+    const res = await fetch('/api/presign', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        filename: videoFile.name,
+        contentType: videoFile.type,
+      }),
+    })
 
-    try {
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
+    const { url } = await res.json()
 
-      const data = await res.json();
-      alert(data.message || "Upload successful");
-    } catch (err) {
-      console.error(err);
-      alert("Upload failed");
-    }
-  };
+    // Step 2: Upload file to S3
+    await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': videoFile.type,
+      },
+      body: videoFile,
+    })
+
+    const s3Url = url.split('?')[0] // Public URL to use
+
+    alert('Upload complete: ' + s3Url)
+
+    // (Optional) Store metadata in DB here if needed
+
+    setUploading(false)
+    setPrompt('')
+    setVideoFile(null)
+  }
 
   return (
-    <div className={styles.container}>
-      <form className={styles.form} onSubmit={handleSubmit}>
-        <input
-          type="text"
-          placeholder="Prompt"
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-        />
-        <input
-          type="file"
-          accept="video/*"
-          onChange={(e) => setVideo(e.target.files[0])}
-        />
-        <button type="submit" className={styles.submitBtn}>Upload</button>
-      </form>
-    </div>
-  );
+    <form onSubmit={handleSubmit} className={styles.form}>
+      <input
+        type="text"
+        placeholder="Prompt/title"
+        value={prompt}
+        onChange={(e) => setPrompt(e.target.value)}
+        required
+      />
+      <input
+        type="file"
+        accept="video/*"
+        onChange={(e) => setVideoFile(e.target.files[0])}
+        required
+      />
+      <button type="submit" disabled={uploading}>
+        {uploading ? 'Uploading...' : 'Upload to S3'}
+      </button>
+    </form>
+  )
 }

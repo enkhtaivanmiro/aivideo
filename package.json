@@ -11,6 +11,8 @@
   "dependencies": {
     "@aws-amplify/auth": "^6.13.0",
     "@aws-sdk/client-cognito-identity-provider": "^3.826.0",
+    "@aws-sdk/client-s3": "^3.828.0",
+    "@aws-sdk/s3-request-presigner": "^3.828.0",
     "amazon-cognito-identity-js": "^6.3.15",
     "aws-amplify": "^6.15.0",
     "aws-sdk": "^2.1692.0",
@@ -26,7 +28,8 @@
     "react-dom": "^19.0.0",
     "react-hot-toast": "^2.5.2",
     "react-icons": "^5.5.0",
-    "react-intersection-observer": "^9.16.0"
+    "react-intersection-observer": "^9.16.0",
+    "videojs-sprite-thumbnails": "^2.2.3"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

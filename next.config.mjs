@@ -1,4 +1,11 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {};
+const nextConfig = {
+  reactStrictMode: true, // optional
+  experimental: {
+    serverActions: {
+      enabled: true,
+    },
+  },
+}
 
-export default nextConfig;
+export default nextConfig

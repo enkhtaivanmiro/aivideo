@@ -34,22 +34,6 @@ export const metadata = {
 }
 
 export default function HomePage() {
-  // Get cookies on server side
-  const cookieStore = cookies()
-  const token = cookieStore.get('token')?.value
-
-  if (!token) {
-    // No token — redirect to login
-    redirect('/login')
-  }
-
-  let user
-  try {
-    user = jwt.verify(token, process.env.JWT_SECRET)
-  } catch {
-    redirect('/login')
-  }
-
   return (
     <div className={styles.container}>
       <Header />
