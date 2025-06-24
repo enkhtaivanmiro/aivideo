@@ -1,42 +1,27 @@
-import { S3Client, ListObjectsV2Command } from '@aws-sdk/client-s3';
+import { connectToDB } from '@/lib/mongodb';
+import Video from '@/models/Video';
+import { NextResponse } from 'next/server';
 
-const REGION = 'ap-northeast-1';
-const BUCKET_NAME = 'aivideo-bucket';
-
-const s3Client = new S3Client({
-  region: REGION,
-  AWS_ACCESS_KEY_ID: process.env.AWS_ACCESS_KEY_ID,
-  AWS_SECRET_ACCESS_KEY: process.env.AWS_SECRET_ACCESS_KEY,
-});
-
-export async function GET() {
+export async function GET(req) {
   try {
-    const command = new ListObjectsV2Command({
-      Bucket: BUCKET_NAME,
-      Prefix: 'uploads/',
-    });
+    await connectToDB();
 
-    const response = await s3Client.send(command);
+    const videos = await Video.find({ reviewLabel: 'In Review' });
 
-    const videos = (response.Contents || []).map((obj) => {
-      const url = `https://${BUCKET_NAME}.s3.${REGION}.amazonaws.com/${obj.Key}`;
-      return {
-        key: obj.Key,
-        url,
-        lastModified: obj.LastModified,
-        size: obj.Size,
-      };
-    });
+    const response = videos.map((v) => ({
+      key: v.videoKey,
+      url: `https://${process.env.AWS_S3_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${v.videoKey}`,
+      title: v.title,
+      uploadedBy: v.userId,
+      createdAt: v.createdAt,
+    }));
 
-    return new Response(JSON.stringify(videos), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return NextResponse.json(response, { status: 200 });
   } catch (err) {
-    console.error('Error listing S3 objects:', err);
-    return new Response(
-      JSON.stringify({ error: 'Failed to list videos' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    console.error('Failed to fetch videos:', err);
+    return NextResponse.json(
+      { error: 'Failed to fetch videos' },
+      { status: 500 }
     );
   }
 }

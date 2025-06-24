@@ -14,35 +14,55 @@ export default function Uploader() {
 
     setUploading(true)
 
-    const res = await fetch('/api/presign', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        filename: videoFile.name,
-        contentType: videoFile.type,
-      }),
-    })
+    try {
+      // STEP 1: Get a presigned URL
+      const presignRes = await fetch('/api/presign', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          originalFilename: videoFile.name,
+          contentType: videoFile.type,
+        }),
+      })
 
-    const { url } = await res.json()
+      const presignData = await presignRes.json()
+      if (!presignData.url || !presignData.key) {
+        throw new Error('Presign failed: ' + presignData.message)
+      }
 
-    // Step 2: Upload file to S3
-    await fetch(url, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': videoFile.type,
-      },
-      body: videoFile,
-    })
+      // STEP 2: Upload to S3
+      await fetch(presignData.url, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': videoFile.type,
+        },
+        body: videoFile,
+      })
 
-    const s3Url = url.split('?')[0] // Public URL to use
+      // STEP 3: Save metadata in DB
+      const saveRes = await fetch('/api/videos/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: prompt,
+          videoKey: presignData.key,
+        }),
+      })
 
-    alert('Upload complete: ' + s3Url)
+      const saveData = await saveRes.json()
+      if (!saveRes.ok) {
+        throw new Error('DB save failed: ' + saveData.message)
+      }
 
-    // (Optional) Store metadata in DB here if needed
-
-    setUploading(false)
-    setPrompt('')
-    setVideoFile(null)
+      alert('Upload complete and saved to DB!')
+    } catch (err) {
+      console.error(err)
+      alert('Upload failed: ' + err.message)
+    } finally {
+      setUploading(false)
+      setPrompt('')
+      setVideoFile(null)
+    }
   }
 
   return (

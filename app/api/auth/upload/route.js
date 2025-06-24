@@ -1,10 +1,9 @@
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
-import { readFile, writeFile } from 'fs/promises'
 import { NextResponse } from 'next/server'
-import path from 'path'
 import crypto from 'crypto'
+import { cookies } from 'next/headers'
+import jwt from 'jsonwebtoken'
 
-const filePath = path.join(process.cwd(), 'data', 'videoList.json')
 
 const s3 = new S3Client({
   region: process.env.AWS_REGION,
@@ -20,44 +19,53 @@ function generateFileName(originalName) {
 }
 
 export async function POST(req) {
-  const formData = await req.formData()
-  const prompt = formData.get('prompt')
-  const video = formData.get('video')
-
-  if (!prompt || !video) {
-    return NextResponse.json({ message: 'Missing prompt or video' }, { status: 400 })
-  }
-
-  const bytes = await video.arrayBuffer()
-  const buffer = Buffer.from(bytes)
-  const uniqueFileName = generateFileName(video.name)
-
   try {
-    // Upload to S3
+    const formData = await req.formData()
+    const prompt = formData.get('prompt')
+    const video = formData.get('video')
+
+    if (!prompt || !video) {
+      return NextResponse.json({ message: 'Missing prompt or video' }, { status: 400 })
+    }
+
+    const cookieStore = cookies()
+    const cognitoIdToken = cookieStore.get('CognitoIdentityServiceProvider.2e3iko2tmgo88146l0sqb0nenm.b714aab8-b081-7061-45c7-a4e7b090f343.idToken')?.value
+    const token = cookieStore.get('token')?.value || cognitoIdToken
+
+    if (!token) {
+      return NextResponse.json({ message: 'Unauthorized: No token found' }, { status: 401 })
+    }
+
+    const decoded = jwt.decode(token)
+    const userId = decoded?.sub
+
+    if (!userId) {
+      return NextResponse.json({ message: 'Unauthorized: Invalid token' }, { status: 401 })
+    }
+
+    const bytes = await video.arrayBuffer()
+    const buffer = Buffer.from(bytes)
+    const uniqueFileName = generateFileName(video.name)
+
+    console.log('Uploading file with key:', `uploads/${userId}/${uniqueFileName}`)
+    console.log('UserId:', userId)
+    console.log('Video name:', video.name)
     const uploadCommand = new PutObjectCommand({
       Bucket: process.env.AWS_BUCKET_NAME,
-      Key: `uploads/${uniqueFileName}`,
+      Key: `uploads/${userId}/${uniqueFileName}`,
       Body: buffer,
       ContentType: video.type,
     })
 
     await s3.send(uploadCommand)
 
-    const jsonData = await readFile(filePath, 'utf-8')
-    const videoList = JSON.parse(jsonData)
-
-    const newVideo = {
-      id: Date.now(),
+    return NextResponse.json({
+      message: 'Upload successful',
+      videoPath: `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/uploads/${userId}/${uniqueFileName}`,
       title: prompt,
-      image: '/images/cover.webp',
-      labels: ['In Review'],
-      videoPath: `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/uploads/${uniqueFileName}`,
-    }
-
-    videoList.push(newVideo)
-    await writeFile(filePath, JSON.stringify(videoList, null, 2))
-
-    return NextResponse.json({ message: 'Upload successful' })
+      userId,
+      labels: 'In Review',
+    })
   } catch (err) {
     console.error('S3 Upload error:', err)
     return NextResponse.json({ message: 'Upload failed' }, { status: 500 })

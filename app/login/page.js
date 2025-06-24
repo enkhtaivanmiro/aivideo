@@ -4,8 +4,8 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import styles from '../../styles/Login.module.css';
-import { fetchAuthSession, signIn, signInWithRedirect } from 'aws-amplify/auth';
 import Cookies from 'js-cookie';
+import { Auth } from '../../lib/auth';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -21,35 +21,42 @@ export default function LoginPage() {
 
     try {
       console.log('Attempting signIn with:', email);
-      const { isSignedIn, nextStep } = await signIn({
-        username: email,
-        password: password,
-      });
+      const result = await Auth.signIn(email, password);
 
-      console.log('SignIn result:', { isSignedIn, nextStep });
+      console.log('SignIn result:', result);
 
-      if (isSignedIn) {
+      if (result.isSignedIn || result.nextStep?.signInStep === 'DONE') {
         toast.success('Амжилттай нэвтэрлээ!', { id: toastId });
-        const idToken = localStorage.getItem('CognitoIdentityServiceProvider.2e3iko2tmgo88146l0sqb0nenm.b714aab8-b081-7061-45c7-a4e7b090f343.idToken');
-        const accessToken = localStorage.getItem('CognitoIdentityServiceProvider.2e3iko2tmgo88146l0sqb0nenm.b714aab8-b081-7061-45c7-a4e7b090f343.idToken');
-        const refreshToken = localStorage.getItem('CognitoIdentityServiceProvider.2e3iko2tmgo88146l0sqb0nenm.b714aab8-b081-7061-45c7-a4e7b090f343.idToken');
-        
-        if (idToken) Cookies.set('idToken', idToken, { expires: 7, path: '/' });
-        if (accessToken) Cookies.set('accessToken', accessToken, { expires: 7, path: '/' });
-        if (refreshToken) Cookies.set('refreshToken', refreshToken, { expires: 7, path: '/' });
+
+        // Get tokens from current session
+        const session = await Auth.currentSession();
+        console.log('Session:', session);
+
+        // In Amplify v6, tokens are accessed differently
+        const tokens = session.tokens;
+        if (tokens) {
+          const idToken = tokens.idToken?.toString();
+          const accessToken = tokens.accessToken?.toString();
+          
+          if (idToken) Cookies.set('idToken', idToken, { expires: 7, path: '/' });
+          if (accessToken) Cookies.set('accessToken', accessToken, { expires: 7, path: '/' });
+        }
+
         router.push('/home');
-      } else if (nextStep) {
-        console.log('Additional step required:', nextStep);
-        toast.error(`Additional authentication step required: ${nextStep.signInStep}`, { id: toastId });
+      } else {
+        // Handle additional steps like MFA, password reset, etc.
+        console.log('Additional step required:', result.nextStep);
+        toast.error('Нэмэлт алхам шаардлагатай', { id: toastId });
       }
     } catch (err) {
       console.error('SignIn error:', err);
 
       let errorMessage = 'Нэвтрэхэд алдаа гарлаа';
 
+      // In Amplify v6, error handling is different
       if (err.name === 'UserNotConfirmedException') {
         errorMessage = 'Та эхлээд и-мэйл хаягаа баталгаажуулна уу.';
-      } else if (err.name === 'NotAuthorizedException') {
+      } else if (err.name === 'NotAuthorizedException' || err.name === 'AuthError') {
         errorMessage = 'Нэвтрэх нэр эсвэл нууц үг буруу байна.';
       } else if (err.name === 'UserNotFoundException') {
         errorMessage = 'Хэрэглэгч олдсонгүй.';
@@ -70,17 +77,16 @@ export default function LoginPage() {
 
     try {
       console.log('Attempting OAuth login with:', provider);
-      
+
+      // In Amplify v6, provider names might be different
       const providerMap = {
-        'Google': 'Google',
-        'Facebook': 'Facebook',
-        'SignInWithApple': 'Apple'
+        Google: 'Google',
+        Facebook: 'Facebook',
+        SignInWithApple: 'Apple', // Changed from 'SignInWithApple' to 'Apple'
       };
 
-      await signInWithRedirect({ 
-        provider: { custom: providerMap[provider] || provider }
-      });
-      
+      await Auth.federatedSignIn({ provider: providerMap[provider] || provider });
+
       toast.dismiss(toastId);
     } catch (err) {
       console.error('OAuth login error:', err);

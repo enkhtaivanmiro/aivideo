@@ -2,67 +2,68 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import toast from 'react-hot-toast';
-import { getCurrentUser } from '../lib/auth'; 
+import { Auth } from '../lib/auth';
 
 export default function AuthGuard({ children }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(null); 
+  const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
 
-  const publicRoutes = ['/', '/login', '/signup', '/auth'];
-  const protectedRoutes = ['/home', '/upload', '/profile', '/settings', '/admin'];
-
-  const isPublicRoute = publicRoutes.includes(pathname);
-  const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
+  const publicPages = ['/login', '/signup', '/forgot-password', '/'];
+  const isPublicPage = publicPages.includes(pathname);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const user = await getCurrentUser();
-        console.log('AuthGuard: Authenticated as', user.username);
-        setIsAuthenticated(true);
+    checkAuthStatus();
+  }, [pathname]);
 
-        if ((pathname === '/login' || pathname === '/signup') && isAuthenticated) {
-          router.replace('/home');
-          toast.success('Already logged in, redirecting to home');
+  const checkAuthStatus = async () => {
+    try {
+      const hasToken = Auth.isAuthenticated();
+      
+      if (hasToken) {
+        try {
+          await Auth.currentAuthenticatedUser();
+          setIsAuthenticated(true);
+          
+          if (pathname === '/login') {
+            router.push('/home');
+            return;
+          }
+        } catch (error) {
+          console.log('Token validation failed:', error);
+          await Auth.signOut();
+          setIsAuthenticated(false);
+          
+          if (!isPublicPage) {
+            router.push('/login');
+          }
         }
-      } catch (err) {
-        console.log('AuthGuard: Not authenticated:', err.message);
+      } else {
         setIsAuthenticated(false);
-
-        if (isProtectedRoute) {
-          router.replace('/login');
-          toast.error('Please log in to access this page');
+        
+        if (!isPublicPage) {
+          router.push('/login');
         }
       }
-    };
+    } catch (error) {
+      console.log('Auth check error:', error);
+      setIsAuthenticated(false);
+      
+      if (!isPublicPage) {
+        router.push('/login');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    checkAuth();
-  }, [pathname, isAuthenticated, isProtectedRoute, router]);
-
-  if (isAuthenticated === null) {
-    return (
-      <div style={centerStyle}>
-        <div>Loading...</div>
-      </div>
-    );
+  if (loading) {
+    return <div style={centerStyle}>Loading...</div>;
   }
 
-  if (isProtectedRoute && !isAuthenticated) {
-    return (
-      <div style={centerStyle}>
-        <div>Redirecting to login...</div>
-      </div>
-    );
-  }
-
-  if ((pathname === '/login' || pathname === '/signup') && isAuthenticated) {
-    return (
-      <div style={centerStyle}>
-        <div>Redirecting to home...</div>
-      </div>
-    );
+  if (isAuthenticated && pathname === '/login') {
+    return <div style={centerStyle}>Redirecting...</div>;
   }
 
   return children;

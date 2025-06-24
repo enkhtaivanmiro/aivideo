@@ -15,17 +15,21 @@ export async function POST(req) {
 
     const session = await new Promise((resolve, reject) => {
       user.authenticateUser(authDetails, {
-        onSuccess: resolve,
-        onFailure: reject,
+        onSuccess: (session) => resolve(session),
+        onFailure: (err) => reject(err),
       });
     });
+
+    const idToken = session.getIdToken().getJwtToken();
+    const accessToken = session.getAccessToken().getJwtToken();
+    const refreshToken = session.getRefreshToken().getToken();
 
     const cookieOptions = {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
       path: '/',
-      maxAge: 60 * 60 * 24 * 7,
+      maxAge: 60 * 60 * 24 * 7, // 7 days
     };
 
     const cookies = [
@@ -38,7 +42,7 @@ export async function POST(req) {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
-        'Set-Cookie': cookies.join(','),
+        'Set-Cookie': cookies.join('; '),
       },
     });
 
