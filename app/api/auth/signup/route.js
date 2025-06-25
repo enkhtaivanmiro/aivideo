@@ -1,5 +1,3 @@
-import { userPool } from '@/lib/cognito';
-
 export async function POST(req) {
   try {
     const { email, password } = await req.json();

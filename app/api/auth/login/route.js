@@ -1,5 +1,4 @@
 import { CognitoUser, AuthenticationDetails } from 'amazon-cognito-identity-js';
-import { userPool } from '@/lib/cognito';
 import { serialize } from 'cookie';
 
 export async function POST(req) {
