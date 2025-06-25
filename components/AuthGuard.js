@@ -1,123 +1,79 @@
-// components/AuthGuard.js
 'use client';
 
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import toast from 'react-hot-toast';
+import { Auth } from '../lib/auth';
 
 export default function AuthGuard({ children }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(null); // null = checking
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
 
-  // Define route categories
-  const publicRoutes = ['/login', '/signup', '/'];
-  const protectedRoutes = ['/home', '/upload', '/profile', '/settings'];
-  
-  const isPublicRoute = publicRoutes.includes(pathname);
-  const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
+  const publicPages = ['/login', '/signup', '/forgot-password', '/'];
+  const isPublicPage = publicPages.includes(pathname);
 
   useEffect(() => {
-    const checkAuthentication = async () => {
-      try {
-        console.log('AuthGuard: Checking authentication for:', pathname);
-        
-        // Import auth functions dynamically
-        const { getCurrentUser } = await import('aws-amplify/auth');
-        
+    checkAuthStatus();
+  }, [pathname]);
+
+  const checkAuthStatus = async () => {
+    try {
+      const hasToken = Auth.isAuthenticated();
+      
+      if (hasToken) {
         try {
-          const user = await getCurrentUser();
-          console.log('AuthGuard: User authenticated:', user.username);
+          await Auth.currentAuthenticatedUser();
           setIsAuthenticated(true);
           
-          // If user is authenticated and trying to access login/signup, redirect to home
-          if (isPublicRoute && pathname !== '/') {
-            console.log('AuthGuard: Redirecting authenticated user to home');
-            router.replace('/home');
+          if (pathname === '/login') {
+            router.push('/home');
             return;
           }
-        } catch (authError) {
-          console.log('AuthGuard: User not authenticated:', authError.message);
+        } catch (error) {
+          console.log('Token validation failed:', error);
+          await Auth.signOut();
           setIsAuthenticated(false);
           
-          // If user is not authenticated and trying to access protected route, redirect to login
-          if (isProtectedRoute) {
-            console.log('AuthGuard: Redirecting unauthenticated user to login');
-            toast.error('Please log in to access this page');
-            router.replace('/login');
-            return;
+          if (!isPublicPage) {
+            router.push('/login');
           }
         }
-      } catch (error) {
-        console.error('AuthGuard: Authentication check failed:', error);
+      } else {
         setIsAuthenticated(false);
         
-        // If there's an error and user is trying to access protected route, redirect to login
-        if (isProtectedRoute) {
-          console.log('AuthGuard: Error occurred, redirecting to login');
-          toast.error('Authentication failed. Please log in.');
-          router.replace('/login');
-          return;
+        if (!isPublicPage) {
+          router.push('/login');
         }
-      } finally {
-        setIsLoading(false);
       }
-    };
-
-    // Only check authentication if we're not already loading
-    if (isLoading) {
-      checkAuthentication();
+    } catch (error) {
+      console.log('Auth check error:', error);
+      setIsAuthenticated(false);
+      
+      if (!isPublicPage) {
+        router.push('/login');
+      }
+    } finally {
+      setLoading(false);
     }
-  }, [pathname, router, isPublicRoute, isProtectedRoute, isLoading]);
+  };
 
-  // Show loading while checking authentication
-  if (isLoading || isAuthenticated === null) {
-    return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '100vh',
-        fontSize: '16px',
-        color: 'white'
-      }}>
-        Loading...
-      </div>
-    );
+  if (loading) {
+    return <div style={centerStyle}>Loading...</div>;
   }
 
-  // For protected routes, only render if authenticated
-  if (isProtectedRoute && !isAuthenticated) {
-    return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '100vh',
-        fontSize: '16px',
-        color: 'white'
-      }}>
-        Redirecting to login...
-      </div>
-    );
-  }
-
-  // For public routes accessed by authenticated users, show loading while redirecting
-  if (isPublicRoute && isAuthenticated && pathname !== '/') {
-    return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '100vh',
-        fontSize: '16px',
-        color: 'white'
-      }}>
-        Redirecting to home...
-      </div>
-    );
+  if (isAuthenticated && pathname === '/login') {
+    return <div style={centerStyle}>Redirecting...</div>;
   }
 
   return children;
 }
+
+const centerStyle = {
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  height: '100vh',
+  fontSize: '16px',
+  color: 'white',
+};

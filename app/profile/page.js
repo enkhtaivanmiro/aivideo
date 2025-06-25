@@ -24,7 +24,6 @@ export default function ProfilePage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // Default/fallback data for display
     const defaultData = {
         name: 'Нэр',
         title: 'Ажил мэргэжил',
@@ -60,7 +59,6 @@ export default function ProfilePage() {
                     return acc;
                 }, {});
 
-                // Update profile data with fetched attributes
                 setProfileData({
                     name: attrMap.name || defaultData.name,
                     title: attrMap.title || defaultData.title,
@@ -81,7 +79,6 @@ export default function ProfilePage() {
             } catch (error) {
                 console.error('ProfilePage: Failed to load user profile:', error);
                 setError(error.message);
-                // Use default data if loading fails
                 setProfileData(defaultData);
             } finally {
                 setLoading(false);
@@ -91,7 +88,6 @@ export default function ProfilePage() {
         fetchUserProfile();
     }, []);
 
-    // Show loading state
     if (loading) {
         return (
             <div className={styles.container}>
@@ -109,7 +105,6 @@ export default function ProfilePage() {
         );
     }
 
-    // Show error state (but still display default data)
     if (error) {
         console.warn('ProfilePage: Displaying with default data due to error:', error);
     }

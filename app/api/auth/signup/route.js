@@ -1,5 +1,3 @@
-import { userPool } from '@/lib/cognito';
-
 export async function POST(req) {
   try {
     const { email, password } = await req.json();
@@ -18,7 +16,10 @@ export async function POST(req) {
       });
     });
 
-    return new Response(JSON.stringify({ message: 'User created', username: user.getUsername() }), {
+    return new Response(JSON.stringify({
+      message: 'User created',
+      username: user.getUsername(),
+    }), {
       status: 201,
       headers: { 'Content-Type': 'application/json' },
     });

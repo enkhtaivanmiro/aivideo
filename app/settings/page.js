@@ -1,4 +1,3 @@
-// app/settings/page.js - Settings page with placeholders
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -7,7 +6,6 @@ import styles from '../../styles/Settings.module.css';
 import toast from 'react-hot-toast';
 
 export default function SettingsPage() {
-  // Initialize with empty values instead of default data
   const [profileData, setProfileData] = useState({
     name: '',
     title: '',
@@ -24,7 +22,6 @@ export default function SettingsPage() {
     },
   });
 
-  // Define placeholders for form fields
   const placeholders = {
     name: 'Жишээ: Б. Энхтайван',
     title: 'Жишээ: Програм хангамжийн инженер',
@@ -56,14 +53,12 @@ export default function SettingsPage() {
         const attributes = await fetchUserAttributes();
         console.log('SettingsPage: Attributes:', attributes);
         
-        // Convert attributes to the expected format
         const attrMap = Object.keys(attributes).reduce((acc, key) => {
           const cleanKey = key.replace('custom:', '');
           acc[cleanKey] = attributes[key];
           return acc;
         }, {});
 
-        // Only update fields that have actual values from the server
         setProfileData((prev) => ({
           ...prev,
           name: attrMap.name || '',
@@ -83,7 +78,6 @@ export default function SettingsPage() {
         console.log('SettingsPage: User attributes loaded:', attrMap);
       } catch (error) {
         console.error('SettingsPage: Failed to load user attributes:', error);
-        // Don't redirect here - AuthGuard handles authentication
       } finally {
         setInitialLoading(false);
       }

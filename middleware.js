@@ -1,22 +1,51 @@
-// middleware.js - Simplified for AWS Amplify
 import { NextResponse } from 'next/server';
+import { jwtVerify, importJWK } from 'jose';
+
+const COGNITO_REGION = process.env.COGNITO_REGION;
+const USER_POOL_ID = process.env.COGNITO_USER_POOL_ID;
+const JWKS_URL = `https://cognito-idp.${COGNITO_REGION}.amazonaws.com/${USER_POOL_ID}/.well-known/jwks.json`;
+
+let cachedKey = null;
+
+async function getPublicKey() {
+  if (cachedKey) return cachedKey;
+
+  const res = await fetch(JWKS_URL);
+  const { keys } = await res.json();
+  cachedKey = await importJWK(keys[0], 'RS256');
+  return cachedKey;
+}
 
 export async function middleware(req) {
-  const { pathname } = req.nextUrl;
-  
-  // Allow all requests to pass through
-  // Authentication will be handled client-side by AuthGuard
-  const response = NextResponse.next();
-  
-  // Add custom headers if needed for debugging
-  response.headers.set('x-pathname', pathname);
-  
-  return response;
+  const url = req.nextUrl.clone();
+  const token =
+    req.cookies.get('idToken')?.value ||
+    req.cookies.get('accessToken')?.value;
+
+  if (!token) {
+    url.pathname = '/login';
+    return NextResponse.redirect(url);
+  }
+
+  try {
+    const publicKey = await getPublicKey();
+    const { payload } = await jwtVerify(token, publicKey);
+    const groups = payload['cognito:groups'] || [];
+
+    if (groups.includes('Admin')) {
+      return NextResponse.next();
+    }
+
+    url.pathname = '/not-authorized';
+    return NextResponse.redirect(url);
+  } catch (err) {
+    console.warn('JWT verification failed:', err.code || err.message);
+
+    url.pathname = '/login';
+    return NextResponse.redirect(url);
+  }
 }
 
 export const config = {
-  matcher: [
-    // Match all routes except static assets and API routes
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$|api/).*)',
-  ],
+  matcher: ['/admin'],
 };

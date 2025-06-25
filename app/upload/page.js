@@ -1,123 +1,193 @@
-import { cookies } from 'next/headers'
-import jwt from 'jsonwebtoken'
-import { redirect } from 'next/navigation'
-import Image from 'next/image'
-import Header from '../../components/header'
-import Uploader from '../../components/Uploader'
-import styles from '../../styles/Upload.module.css'
-import Link from 'next/link';
+import { cookies as getCookies } from "next/headers";
+import jwt from "jsonwebtoken";
+import styles from "../../styles/Upload.module.css";
+import Header from "../../components/header";
+import Uploader from "../../components/Uploader";
+import Link from "next/link";
+import Image from "next/image";
 
-const videoList = [
-  {
-    id: 1,
-    title: 'Video 1',
-    image: '/images/cover.webp',
-    labels: ['Approved'],
-  },
-  {
-    id: 2,
-    title: 'Video 2',
-    image: '/images/cover.webp',
-    labels: ['In Review'],
-  },
-  {
-    id: 3,
-    title: 'Video 3',
-    image: '/images/cover.webp',
-    labels: ['Rejected'],
-  },
-]
+const BUCKET = process.env.NEXT_PUBLIC_AWS_S3_BUCKET;
+const REGION = process.env.NEXT_PUBLIC_AWS_REGION;
 
 export const metadata = {
-  title: 'Upload page',
-  description: 'User dashboard page',
-}
+  title: "Upload page",
+  description: "User dashboard page",
+};
 
-export default function HomePage() {
-  // Get cookies on server side
-  const cookieStore = cookies()
-  const token = cookieStore.get('token')?.value
+export default async function HomePage() {
+  const cookieStore = await getCookies();
 
-  if (!token) {
-    // No token — redirect to login
-    redirect('/login')
-  }
+  const rawToken =
+    cookieStore.get("token")?.value ||
+    cookieStore.get(
+      "CognitoIdentityServiceProvider.2e3iko2tmgo88146l0sqb0nenm.b714aab8-b081-7061-45c7-a4e7b090f343.idToken"
+    )?.value;
 
-  let user
+  const decoded = rawToken ? jwt.decode(rawToken) : null;
+  const userId = decoded?.sub;
+
+  // Fetch your videos from your DB or API - for demo I’m using a placeholder empty array
+  let videoList = [];
   try {
-    user = jwt.verify(token, process.env.JWT_SECRET)
-  } catch {
-    redirect('/login')
+    // Replace this with your real DB call to get all videos
+    // For example, fetch('/api/videos/user') or from your DB directly
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/videos/user?userId=${userId}`);
+    if (response.ok) {
+      videoList = await response.json();
+    }
+  } catch (err) {
+    console.error("Failed to fetch videos:", err);
   }
+
+  // Filter user videos
+  const userVideos = videoList.filter((video) => video.userId === userId);
+
+  const getStatusClass = (status) => {
+    switch (status) {
+      case "Accepted":
+        return styles.approvedLabel;
+      case "In Review":
+        return styles.inReview;
+      case "Rejected":
+        return styles.rejected;
+      default:
+        return styles.statusLabel;
+    }
+  };
+
+  const getStatusLabel = (status) => {
+    switch (status) {
+      case "Accepted":
+        return "Зөвшөөрсөн";
+      case "In Review":
+        return "Шалгагдаж буй";
+      case "Rejected":
+        return "Татгалзсан";
+      default:
+        return status;
+    }
+  };
 
   return (
     <div className={styles.container}>
       <Header />
       <main className={styles.main}>
-        <Uploader />
-        <>
-        <h1 className={styles.sectionTitle}>Таны контент</h1>
-        <div className={styles.carousel}>
-          <Link href="/upload"><div className={styles.upload}><img src="/upload.svg" alt="Arrow" /></div></Link>
-          {videoList
-            .filter(item =>
-              item.labels.some(label =>
-                ['Approved', 'In Review', 'Rejected'].includes(label)
-              )
-            )
-            .map(item => (
-              <div key={item.id} className={styles.card}>
-                <div className={styles.labelContainer}>
-                  {item.labels.includes('Approved') && (
-                    <span className={styles.approvedLabel}>Зөвшөөрсөн</span>
-                  )}
-                  {item.labels.includes('In Review') && (
-                    <span className={styles.inReview}>Шалгагдаж буй</span>
-                  )}
-                  {item.labels.includes('Rejected') && (
-                    <span className={styles.rejected}>Татгалзсан</span>
-                  )}
-                </div>
-                <Image
-                  src={item.image}
-                  alt={item.title}
-                  width={250}
-                  height={140}
-                  className={styles.cardImage}
-                  priority
-                />
-              </div>
-            ))}
+        <div className={styles.uploadSection}>
+          <div className={styles.uploadCard}>
+            <div className={styles.uploadHeader}>
+              <h2 className={styles.uploadTitle}>
+                <img src="/upload-icon.svg" alt="Upload" width="24" height="24" />
+                Контент оруулах
+              </h2>
+              <p className={styles.uploadSubtitle}>
+                Сонирхолтой хиймэл оюун ухаанаар бүтээсэн контентоо хуваалцаарай
+              </p>
+            </div>
+            <div className={styles.uploadContent}>
+              <Uploader />
+            </div>
+          </div>
         </div>
-        </>
 
-        <h1 className={styles.sectionTitle}>Admin Approved Contents</h1>
-        <div className={styles.carousel}>
-          {videoList
-            .filter(item => item.labels.includes('Approved'))
-            .map(item => (
-              <div key={item.id} className={styles.card}>
-                <div className={styles.labelContainer}>
-                  <span className={styles.approvedLabel}>Зөвшөөрсөн</span>
+        {/* User Content Section */}
+        <section className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <div className={styles.sectionIndicator}></div>
+            <h1 className={styles.sectionTitle}>Таны контент</h1>
+            <div className={styles.sectionDivider}></div>
+          </div>
+
+          <div className={styles.carousel}>
+            {/* Upload Card */}
+            <Link href="/upload" className={styles.upload}>
+              <div className={styles.uploadIcon}>
+                <img src="/upload.svg" alt="Upload" width="24" height="24" />
+              </div>
+              <span className={styles.uploadText}>Контент оруулах</span>
+            </Link>
+
+            {/* User Videos */}
+            {userVideos.map((item) => (
+              <div key={item.videoKey} className={styles.card}>
+                <div className={styles.cardImageContainer}>
+                  <Image
+                    src={item.url || `/placeholder.svg`}
+                    alt={item.title}
+                    width={250}
+                    height={140}
+                    className={styles.cardImage}
+                    priority
+                  />
+                  <div className={styles.labelContainer}>
+                    <div className={`${styles.statusLabel} ${getStatusClass(item.labels)}`}>
+                      {getStatusLabel(item.labels)}
+                    </div>
+                  </div>
                 </div>
-                <Image
-                  src={item.image}
-                  alt={item.title}
-                  width={250}
-                  height={140}
-                  className={styles.cardImage}
-                  priority
-                />
-                <div className={styles.progressBarContainer}>
-                  <div
-                    className={styles.progressBar}
-                    style={{ width: `${item.progress}%` }}
-                  ></div>
+                <div className={styles.cardContent}>
+                  <h3 className={styles.cardTitle}>{item.title}</h3>
                 </div>
               </div>
             ))}
-        </div>
+          </div>
+
+          {userVideos.length === 0 && (
+            <div className={styles.emptyState}>
+              <div className={styles.emptyIcon}>
+                <img src="/upload.svg" alt="Upload" width="32" height="32" />
+              </div>
+              <h3 className={styles.emptyTitle}>Контент оруулаагүй байна</h3>
+              <p className={styles.emptyDescription}>Одоогоор контент оруулаагүй байна </p>
+            </div>
+          )}
+        </section>
+
+        {/* Admin Approved Content Section */}
+        <section className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <div className={styles.sectionIndicator}></div>
+            <h1 className={styles.sectionTitle}>Зөвшөөрөгдсөн контентууд</h1>
+            <div className={styles.sectionDivider}></div>
+          </div>
+
+          <div className={styles.carousel}>
+            {videoList
+              .filter((item) => item.labels === "Accepted")
+              .map((item) => (
+                <div key={item.videoKey} className={styles.card}>
+                  <div className={styles.cardImageContainer}>
+                    <Image
+                      src={item.url || `/placeholder.svg`}
+                      alt={item.title}
+                      width={250}
+                      height={140}
+                      className={styles.cardImage}
+                      priority
+                    />
+                    <div className={styles.labelContainer}>
+                      <div className={`${styles.statusLabel} ${styles.approvedLabel}`}>
+                        Зөвшөөрсөн
+                      </div>
+                    </div>
+                  </div>
+                  <div className={styles.cardContent}>
+                    <h3 className={styles.cardTitle}>{item.title}</h3>
+                  </div>
+                </div>
+              ))}
+          </div>
+
+          {videoList.filter((item) => item.labels === "Accepted").length === 0 && (
+            <div className={styles.emptyState}>
+              <div className={`${styles.emptyIcon} ${styles.approvedEmptyIcon}`}>
+                <img src="/check-circle.svg" alt="Approved" width="32" height="32" />
+              </div>
+              <h3 className={styles.emptyTitle}>Зөвшөөрөгдсөн контент одоогоор байхгүй байна</h3>
+              <p className={styles.emptyDescription}>Энд таны зөвшөөрөгдсөн контентууд харагдана</p>
+            </div>
+          )}
+        </section>
       </main>
     </div>
-  )
+  );
 }

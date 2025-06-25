@@ -20,26 +20,20 @@ const Header = () => {
   const handleLogout = async () => {
     try {
       const { signOut } = await import('aws-amplify/auth');
-      
       await signOut();
       
-      console.log('Successfully signed out from AWS Amplify');
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+      });
+
+      localStorage.clear();
+      sessionStorage.clear();
+
+      window.location.href = '/login';
     } catch (error) {
-      console.error('Error signing out from AWS Amplify:', error);
+      console.error('Logout failed:', error);
+      toast.error('Logout failed');
     }
-    
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    localStorage.removeItem('authToken');
-    
-    sessionStorage.removeItem('token');
-    sessionStorage.removeItem('user');
-    sessionStorage.removeItem('authToken');
-    
-    document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-    document.cookie = 'authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-    
-    window.location.href = '/';
   };
 
   return (
