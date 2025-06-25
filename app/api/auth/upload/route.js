@@ -55,6 +55,7 @@ export async function POST(req) {
       Key: `uploads/${userId}/${uniqueFileName}`,
       Body: buffer,
       ContentType: video.type,
+      ACL: 'public-read',
     })
 
     await s3.send(uploadCommand)

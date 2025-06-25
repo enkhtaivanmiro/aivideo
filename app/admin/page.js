@@ -16,7 +16,7 @@ export default function AdminPage() {
 
     try {
       console.log("Fetching videos from /api/videos...");
-      const res = await fetch("/api/videos");
+      const res = await fetch("/api/videos/all");
 
       console.log("Response status:", res.status);
       console.log("Response headers:", Object.fromEntries(res.headers.entries()));
@@ -65,7 +65,14 @@ export default function AdminPage() {
       console.log("Action response status:", res.status);
 
       if (res.ok) {
-        setVideos(prev => prev.filter(v => v.key !== videoKey));
+        setVideos(prev =>
+        prev.map((v) =>
+          v.key === videoKey
+            ? { ...v, reviewLabel: action === 'accept' ? 'Accepted' : 'Rejected' }
+            : v
+        )
+      );
+
         console.log(`Successfully ${action}ed video:`, videoKey);
       } else {
         const errorText = await res.text();
@@ -170,14 +177,13 @@ export default function AdminPage() {
         </div>
         <div className={styles.headerActions}>
           <div className={styles.badge}>
-            <span className={styles.badgeIcon}>🕐</span>
             {videos.length} pending
           </div>
           <button 
             onClick={fetchVideos} 
             className={`${styles.button} ${styles.refreshButton}`}
           >
-            🔄 Refresh
+            Refresh
           </button>
         </div>
       </div>
@@ -191,7 +197,7 @@ export default function AdminPage() {
         </div>
       ) : (
         <div className={styles.videoGrid}>
-          {videos.map(({ key, url, title, uploadedBy, createdAt }) => {
+          {videos.map(({ key, url, title, uploadedBy, createdAt, reviewLabel }) => {
             const isProcessing = processingVideos.has(key);
             
             return (
@@ -201,7 +207,18 @@ export default function AdminPage() {
                     <h3 title={title || getFileName(key)}>
                       {title || getFileName(key)}
                     </h3>
-                    <span className={styles.pendingBadge}>Pending</span>
+                    <span
+                      className={`${styles.statusBadge} ${
+                        reviewLabel === 'Accepted'
+                          ? styles.accepted
+                          : reviewLabel === 'Rejected'
+                          ? styles.rejected
+                          : styles.pending
+                      }`}
+                    >
+                      {reviewLabel}
+                    </span>
+
                   </div>
                   {(uploadedBy || createdAt) && (
                     <div className={styles.cardMeta}>
@@ -238,7 +255,7 @@ export default function AdminPage() {
                           Processing...
                         </span>
                       ) : (
-                        <span>✅ Accept</span>
+                        <span>Accept</span>
                       )}
                     </button>
 
@@ -253,7 +270,7 @@ export default function AdminPage() {
                           Processing...
                         </span>
                       ) : (
-                        <span>❌ Reject</span>
+                        <span>Reject</span>
                       )}
                     </button>
                   </div>

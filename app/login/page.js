@@ -28,11 +28,9 @@ export default function LoginPage() {
       if (result.isSignedIn || result.nextStep?.signInStep === 'DONE') {
         toast.success('Амжилттай нэвтэрлээ!', { id: toastId });
 
-        // Get tokens from current session
         const session = await Auth.currentSession();
         console.log('Session:', session);
 
-        // In Amplify v6, tokens are accessed differently
         const tokens = session.tokens;
         if (tokens) {
           const idToken = tokens.idToken?.toString();
@@ -44,7 +42,6 @@ export default function LoginPage() {
 
         router.push('/home');
       } else {
-        // Handle additional steps like MFA, password reset, etc.
         console.log('Additional step required:', result.nextStep);
         toast.error('Нэмэлт алхам шаардлагатай', { id: toastId });
       }
@@ -53,7 +50,6 @@ export default function LoginPage() {
 
       let errorMessage = 'Нэвтрэхэд алдаа гарлаа';
 
-      // In Amplify v6, error handling is different
       if (err.name === 'UserNotConfirmedException') {
         errorMessage = 'Та эхлээд и-мэйл хаягаа баталгаажуулна уу.';
       } else if (err.name === 'NotAuthorizedException' || err.name === 'AuthError') {
@@ -78,11 +74,10 @@ export default function LoginPage() {
     try {
       console.log('Attempting OAuth login with:', provider);
 
-      // In Amplify v6, provider names might be different
       const providerMap = {
         Google: 'Google',
         Facebook: 'Facebook',
-        SignInWithApple: 'Apple', // Changed from 'SignInWithApple' to 'Apple'
+        SignInWithApple: 'Apple',
       };
 
       await Auth.federatedSignIn({ provider: providerMap[provider] || provider });

@@ -27,10 +27,7 @@ export const clearAllAuth = async () => {
 
 export const debugAuthState = () => {
   if (typeof window === 'undefined') return;
-  
-  console.log('=== AUTH DEBUG ===');
   console.log('Cookies:', document.cookie);
   console.log('LocalStorage keys:', Object.keys(localStorage));
   console.log('SessionStorage keys:', Object.keys(sessionStorage));
-  console.log('================');
 };
