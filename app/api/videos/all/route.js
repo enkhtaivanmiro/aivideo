@@ -1,3 +1,7 @@
+import { connectToDB } from '@/lib/mongodb';
+import Video from '@/models/Video';
+import { NextResponse } from 'next/server';
+
 export async function GET() {
   try {
     console.log('Connecting to DB...');
