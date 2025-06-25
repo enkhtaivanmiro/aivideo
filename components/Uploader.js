@@ -199,7 +199,7 @@ export default function Uploader() {
             <img src="/loader.svg" alt="Loading" width="20" height="20" className={styles.spinner} />
             <div>
               <p className={styles.uploadingTitle}>Uploading your video...</p>
-              <p className={styles.uploadingSubtext}>Please don't close this page</p>
+              <p className={styles.uploadingSubtext}>Please don&apos;t close this page</p>
             </div>
           </div>
         </div>
