@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import { useState, useEffect } from 'react';
 import Header from '../../components/header';
@@ -13,6 +13,7 @@ export default function ProfilePage() {
         stats: {
             Uploaded: '',
             Accepted: '',
+            Rejected: '',
             Review: '',
         },
         contact: {
@@ -32,6 +33,7 @@ export default function ProfilePage() {
         stats: {
             Uploaded: '0',
             Accepted: '0',
+            Rejected: '0',
             Review: '0',
         },
         contact: {
@@ -45,19 +47,21 @@ export default function ProfilePage() {
             try {
                 const { getCurrentUser, fetchUserAttributes } = await import('aws-amplify/auth');
                 console.log('ProfilePage: Fetching user profile data');
-                
+
                 const user = await getCurrentUser();
                 console.log('ProfilePage: User found:', user.username);
-                
+
                 const attributes = await fetchUserAttributes();
                 console.log('ProfilePage: User attributes:', attributes);
-                
-                // Convert attributes to the expected format
+
                 const attrMap = Object.keys(attributes).reduce((acc, key) => {
                     const cleanKey = key.replace('custom:', '');
                     acc[cleanKey] = attributes[key];
                     return acc;
                 }, {});
+
+                const res = await fetch('/api/videos/stats');
+                const stats = await res.json();
 
                 setProfileData({
                     name: attrMap.name || defaultData.name,
@@ -65,9 +69,10 @@ export default function ProfilePage() {
                     location: attrMap.location || defaultData.location,
                     about: attrMap.about || defaultData.about,
                     stats: {
-                        Uploaded: attrMap.uploaded || defaultData.stats.Uploaded,
-                        Accepted: attrMap.accepted || defaultData.stats.Accepted,
-                        Review: attrMap.review || defaultData.stats.Review,
+                        Uploaded: stats.Uploaded || '0',
+                        Accepted: stats.Accepted || '0',
+                        Rejected: stats.Rejected || '0',
+                        Review: stats.Review || '0',
                     },
                     contact: {
                         email: attrMap.email || attributes.email || defaultData.contact.email,
@@ -92,10 +97,10 @@ export default function ProfilePage() {
         return (
             <div className={styles.container}>
                 <Header />
-                <div style={{ 
-                    display: 'flex', 
-                    justifyContent: 'center', 
-                    alignItems: 'center', 
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
                     height: '50vh',
                     color: 'white'
                 }}>
@@ -112,79 +117,57 @@ export default function ProfilePage() {
     return (
         <div className={styles.container}>
             <Header />
-            
+
             <div className={styles.wrapper}>
-                {/* Profile Header */}
                 <div className={styles.profileHeader}>
-                    <div className={styles.avatar}>
-                        👤
-                    </div>
-                    
-                    <h1 className={styles.name}>
-                        {profileData.name}
-                    </h1>
-                    
-                    <p className={styles.title}>
-                        {profileData.title}
-                    </p>
-                    
-                    <p className={styles.location}>
-                        📍 {profileData.location}
-                    </p>
+                    <div className={styles.avatar}>👤</div>
+                    <h1 className={styles.name}>{profileData.name}</h1>
+                    <p className={styles.title}>{profileData.title}</p>
+                    <p className={styles.location}>📍 {profileData.location}</p>
                 </div>
 
-                {/* Stats Section */}
                 <div className={styles.statsGrid}>
                     <div className={styles.statCard}>
                         <div className={`${styles.statNumber} ${styles.blue}`}>
                             {profileData.stats.Uploaded}
                         </div>
-                        <div className={styles.statLabel}>
-                            Оруулсан
-                        </div>
+                        <div className={styles.statLabel}>Оруулсан</div>
                     </div>
-                    
+
                     <div className={styles.statCard}>
                         <div className={`${styles.statNumber} ${styles.green}`}>
                             {profileData.stats.Accepted}
                         </div>
-                        <div className={styles.statLabel}>
-                            Зөвшөөрсөн
-                        </div>
+                        <div className={styles.statLabel}>Зөвшөөрсөн</div>
                     </div>
-                    
+
+                    <div className={styles.statCard}>
+                        <div className={`${styles.statNumber} ${styles.red}`}>
+                            {profileData.stats.Rejected}
+                        </div>
+                        <div className={styles.statLabel}>Татгалзсан</div>
+                    </div>
+
                     <div className={styles.statCard}>
                         <div className={`${styles.statNumber} ${styles.orange}`}>
                             {profileData.stats.Review}
                         </div>
-                        <div className={styles.statLabel}>
-                            Шалгагдсан
-                        </div>
+                        <div className={styles.statLabel}>Шалгагдаж буй</div>
                     </div>
                 </div>
 
-                {/* About Section */}
                 <div className={styles.section}>
-                    <h2 className={styles.sectionTitle}>
-                        Миний тухай
-                    </h2>
-                    <p className={styles.aboutText}>
-                        {profileData.about}
-                    </p>
+                    <h2 className={styles.sectionTitle}>Миний тухай</h2>
+                    <p className={styles.aboutText}>{profileData.about}</p>
                 </div>
 
-                {/* Contact Info */}
                 <div className={styles.section}>
-                    <h2 className={styles.sectionTitle}>
-                        Холбогдох мэдээлэл
-                    </h2>
-                    
+                    <h2 className={styles.sectionTitle}>Холбогдох мэдээлэл</h2>
                     <div className={styles.contactGrid}>
                         <div className={styles.contactItem}>
                             <span className={styles.contactIcon}>📧</span>
                             <span className={styles.contactText}>{profileData.contact.email}</span>
                         </div>
-                        
                         <div className={styles.contactItem}>
                             <span className={styles.contactIcon}>📱</span>
                             <span className={styles.contactText}>{profileData.contact.phone}</span>
