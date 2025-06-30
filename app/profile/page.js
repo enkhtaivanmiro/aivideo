@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Header from '../../components/header';
 import styles from '../../styles/Profile.module.css';
 
@@ -24,6 +24,7 @@ export default function ProfilePage() {
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const dvdRef = useRef(null);
 
     const defaultData = {
         name: 'Нэр',
@@ -46,14 +47,8 @@ export default function ProfilePage() {
         const fetchUserProfile = async () => {
             try {
                 const { getCurrentUser, fetchUserAttributes } = await import('aws-amplify/auth');
-                console.log('ProfilePage: Fetching user profile data');
-
                 const user = await getCurrentUser();
-                console.log('ProfilePage: User found:', user.username);
-
                 const attributes = await fetchUserAttributes();
-                console.log('ProfilePage: User attributes:', attributes);
-
                 const attrMap = Object.keys(attributes).reduce((acc, key) => {
                     const cleanKey = key.replace('custom:', '');
                     acc[cleanKey] = attributes[key];
@@ -79,8 +74,6 @@ export default function ProfilePage() {
                         phone: attrMap.phone || defaultData.contact.phone,
                     },
                 });
-
-                console.log('ProfilePage: Profile data loaded successfully');
             } catch (error) {
                 console.error('ProfilePage: Failed to load user profile:', error);
                 setError(error.message);
@@ -93,29 +86,55 @@ export default function ProfilePage() {
         fetchUserProfile();
     }, []);
 
+    useEffect(() => {
+        const dvd = dvdRef.current;
+        if (!dvd) return;
+
+        let x = Math.random() * (window.innerWidth - 100);
+        let y = Math.random() * (window.innerHeight - 50);
+        let dx = 1.5;
+        let dy = 1.5;
+        const colors = ['#0f0', '#0c0', '#6f6'];
+        let index = 0;
+
+        const animate = () => {
+            x += dx;
+            y += dy;
+            if (x <= 0 || x >= window.innerWidth - 100) {
+                dx = -dx;
+                index = (index + 1) % colors.length;
+                dvd.style.color = colors[index];
+            }
+            if (y <= 0 || y >= window.innerHeight - 50) {
+                dy = -dy;
+                index = (index + 1) % colors.length;
+                dvd.style.color = colors[index];
+            }
+            dvd.style.left = `${x}px`;
+            dvd.style.top = `${y}px`;
+            requestAnimationFrame(animate);
+        };
+
+        animate();
+    }, []);
+
     if (loading) {
         return (
             <div className={styles.container}>
                 <Header />
-                <div style={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    height: '50vh',
-                    color: 'white'
-                }}>
-                    Loading profile...
+                <div className="scanLines" />
+                <div className={styles.loadingContent}>
+                    <div className={styles.loadingSpinner}>📀</div>
+                    <div className={styles.loadingText}>LOADING PROFILE...</div>
+                    <div className={styles.loadingBar}>████████████████████ 100%</div>
                 </div>
             </div>
         );
     }
 
-    if (error) {
-        console.warn('ProfilePage: Displaying with default data due to error:', error);
-    }
-
     return (
         <div className={styles.container}>
+            <div className="scanLines" />
             <Header />
 
             <div className={styles.wrapper}>
@@ -127,33 +146,14 @@ export default function ProfilePage() {
                 </div>
 
                 <div className={styles.statsGrid}>
-                    <div className={styles.statCard}>
-                        <div className={`${styles.statNumber} ${styles.blue}`}>
-                            {profileData.stats.Uploaded}
+                    {['Uploaded', 'Accepted', 'Rejected', 'Review'].map((key) => (
+                        <div className={styles.statCard} key={key}>
+                            <div className={`${styles.statNumber} ${styles[key.toLowerCase()]}`}>
+                                {profileData.stats[key]}
+                            </div>
+                            <div className={styles.statLabel}>{key}</div>
                         </div>
-                        <div className={styles.statLabel}>Оруулсан</div>
-                    </div>
-
-                    <div className={styles.statCard}>
-                        <div className={`${styles.statNumber} ${styles.green}`}>
-                            {profileData.stats.Accepted}
-                        </div>
-                        <div className={styles.statLabel}>Зөвшөөрсөн</div>
-                    </div>
-
-                    <div className={styles.statCard}>
-                        <div className={`${styles.statNumber} ${styles.red}`}>
-                            {profileData.stats.Rejected}
-                        </div>
-                        <div className={styles.statLabel}>Татгалзсан</div>
-                    </div>
-
-                    <div className={styles.statCard}>
-                        <div className={`${styles.statNumber} ${styles.orange}`}>
-                            {profileData.stats.Review}
-                        </div>
-                        <div className={styles.statLabel}>Шалгагдаж буй</div>
-                    </div>
+                    ))}
                 </div>
 
                 <div className={styles.section}>
