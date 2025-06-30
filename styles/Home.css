@@ -1,0 +1,99 @@
+body, html {
+  margin: 0;
+  padding: 0;
+  font-family: 'Courier New', monospace;
+  background-color: #000;
+  color: #00ff66;
+}
+
+.page-container {
+  background-color: black;
+  min-height: 100vh;
+  color: #00ff66;
+}
+
+.header {
+  padding: 1rem;
+  background-color: #000;
+  border-bottom: 1px solid #00ff66;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  text-shadow: 0 0 8px #00ff66;
+}
+
+.nav-menu .nav-button,
+.btn-primary,
+.btn-outline {
+  border: 1px solid #00ff66;
+  background-color: transparent;
+  color: #00ff66;
+  padding: 0.5rem 1rem;
+  margin: 0.2rem;
+  cursor: pointer;
+  text-shadow: 0 0 4px #00ff66;
+}
+
+.btn-outline:hover,
+.btn-primary:hover,
+.nav-button:hover {
+  background-color: #003300;
+}
+
+.video-card {
+  background-color: #111;
+  border: 1px solid #00ff66;
+  padding: 10px;
+  margin: 10px;
+  text-shadow: 0 0 4px #00ff66;
+  transition: transform 0.2s;
+}
+
+.video-card:hover {
+  transform: scale(1.01);
+  box-shadow: 0 0 10px #00ff66;
+}
+
+.video-element {
+  width: 100%;
+  border: 1px solid #00ff66;
+}
+
+.overlay {
+  position: absolute;
+  display: none;
+}
+
+.overlay.visible {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.badge-success { color: #00ff66; }
+.badge-error { color: #ff4444; }
+.badge-warning { color: #ffff66; }
+
+.ascii-art, .ascii-empty {
+  white-space: pre;
+  text-align: center;
+  font-size: 1rem;
+  color: #00ff66;
+  text-shadow: 0 0 6px #00ff66;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 2rem;
+}
+
+.skeleton {
+  background-color: #003300;
+  border-radius: 4px;
+}
