@@ -54,7 +54,6 @@ export default function Signup() {
         console.error('SignUp error:', err);
         let errorMessage = 'Бүртгэхэд алдаа гарлаа';
         
-        // Handle specific error cases
         if (err.name === 'UsernameExistsException') {
           errorMessage = 'Энэ и-мэйл хаяг аль хэдийн бүртгэгдсэн байна';
         } else if (err.name === 'InvalidPasswordException') {
@@ -85,7 +84,6 @@ export default function Signup() {
         provider: provider.toLowerCase()
       });
       
-      // Note: signInWithRedirect will redirect the page, so this might not execute
       toast.success('Амжилттай бүртгэгдлээ!', { id: toastId });
     } catch (err) {
       console.error('OAuth signup error:', err);
