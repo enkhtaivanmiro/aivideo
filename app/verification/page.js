@@ -30,7 +30,6 @@ function VerifyEmail() {
       
       console.log('Confirming signup for:', username);
       
-      // First, confirm the signup
       const { isSignUpComplete } = await confirmSignUp({
         username: username,
         confirmationCode: code,
@@ -41,9 +40,6 @@ function VerifyEmail() {
       if (isSignUpComplete) {
         toast.success('Амжилттай баталгаажлаа!', { id: toastId });
         
-        // Now automatically sign the user in
-        // We'll need to get the password from somewhere or redirect to login
-        // For security reasons, we should redirect to login instead of storing password
         toast.success('Баталгаажуулалт амжилттай! Одоо нэвтэрнэ үү.');
         router.push('/login?verified=true');
       } else {
@@ -53,7 +49,6 @@ function VerifyEmail() {
       console.error('Verification error:', err);
       let errorMessage = 'Баталгаажуулахад алдаа гарлаа';
       
-      // Handle specific error cases
       if (err.name === 'CodeMismatchException') {
         errorMessage = 'Баталгаажуулах код буруу байна';
       } else if (err.name === 'ExpiredCodeException') {

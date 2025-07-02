@@ -158,7 +158,9 @@ export default function HomePage() {
                   className={styles.cardImage}
                   poster="/placeholder.svg?height=140&width=250"
                   preload="metadata"
+                  controls
                 />
+
                 <div className={styles.caseReflection}></div>
 
                 {video.status && (
