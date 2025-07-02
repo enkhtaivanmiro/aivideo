@@ -1,8 +1,13 @@
-/* Settings.module.css */
-
 .container {
-  min-height: 100vh;
   margin-top: 10vh;
+  background-color: #000000;
+  min-height: 100vh;
+  padding: 20px;
+  color: #00ff00;
+  font-family: "Courier New", monospace;
+  position: relative;
+  overflow-x: hidden;
+  animation: flicker 0.15s infinite linear;
 }
 
 .wrapper {
@@ -11,54 +16,49 @@
   padding: 2rem 1rem;
 }
 
-/* Page Header */
 .pageHeader {
-  border-radius: 12px;
-  padding: 2rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  margin-bottom: 2rem;
   text-align: center;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  background: #111;
+  border: 3px solid #333;
+  border-radius: 8px;
 }
 
 .pageTitle {
-  margin: 0 0 0.5rem;
-  font-size: 2.5rem;
-  font-weight: 600;
-  color: #ffffff;
+  font-size: 2.2rem;
+  font-weight: bold;
+  color: #00ff00;
+  margin-bottom: 0.5rem;
+  animation: pulse 2s infinite;
 }
 
 .pageSubtitle {
-  margin: 0;
-  color: #ffffff;
-  font-size: 1.1rem;
+  color: #00cc00;
+  font-size: 1rem;
 }
 
-/* Section Styles */
 .section {
-  border-radius: 12px;
+  background: #111;
+  border: 2px solid #333;
+  border-radius: 8px;
   padding: 2rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   margin-bottom: 2rem;
 }
 
 .sectionTitle {
-  margin: 0 0 1.5rem;
   font-size: 1.5rem;
-  font-weight: 600;
-  color: #ffffff;
-  border-bottom: 2px solid #e2e8f0;
-  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+  color: #00ff00;
+  font-weight: bold;
+  text-shadow: 0 0 10px #00ff00;
+  text-align: center;
 }
 
-/* Form Styles */
-.formGrid {
-  display: grid;
-  gap: 1rem;
-}
-
+.formGrid,
 .statsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 1rem;
 }
 
@@ -68,192 +68,134 @@
 }
 
 .label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
-  color: #ffffff;
+  font-weight: bold;
+  color: #00ff00;
+  font-size: 0.9rem;
 }
 
-.input {
-  width: 100%;
+.input,
+.textarea {
+  background-color: #000;
+  border: 1px solid #00ff00;
+  color: #00ff00;
   padding: 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 1rem;
-  box-sizing: border-box;
-  transition: border-color 0.2s;
-  outline: none;
+  border-radius: 4px;
+  font-family: "Courier New", monospace;
+  font-size: 0.95rem;
 }
 
-.input:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+.input:focus,
+.textarea:focus {
+  outline: none;
+  border-color: #00ffcc;
+  box-shadow: 0 0 5px #00ffcc;
 }
 
 .textarea {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 1rem;
-  box-sizing: border-box;
-  transition: border-color 0.2s;
-  outline: none;
   resize: vertical;
   line-height: 1.5;
-  font-family: inherit;
 }
 
-.textarea:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-/* Action Section */
 .actionSection {
-  border-radius: 12px;
-  padding: 2rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   text-align: center;
+  border: 2px solid #333;
+  border-radius: 8px;
+  padding: 2rem;
+  background: #111;
 }
 
 .buttonGroup {
   display: flex;
-  gap: 1rem;
   justify-content: center;
   flex-wrap: wrap;
+  gap: 1rem;
 }
 
 .button {
-  border: none;
+  border: 2px solid #00ff00;
+  background: transparent;
+  color: #00ff00;
   padding: 0.75rem 2rem;
   border-radius: 8px;
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: bold;
   cursor: pointer;
-  transition: all 0.2s;
-  min-width: 120px;
+  transition: all 0.2s ease-in-out;
+  font-family: "Courier New", monospace;
+}
+
+.button:hover {
+  background-color: rgba(0, 255, 0, 0.1);
+  transform: scale(1.05);
+  box-shadow: 0 0 10px #00ff00;
 }
 
 .saveButton {
-  background-color: #10b981;
-  color: white;
-}
-
-.saveButton:hover {
-  background-color: #059669;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
-}
-
-.saveButton:active {
-  transform: translateY(0);
+  border-color: #00ff00;
 }
 
 .resetButton {
-  background-color: #6b7280;
-  color: white;
+  border-color: #ff0000;
+  color: #ff0000;
 }
 
 .resetButton:hover {
-  background-color: #4b5563;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(107, 114, 128, 0.3);
-}
-
-.resetButton:active {
-  transform: translateY(0);
+  background-color: rgba(255, 0, 0, 0.1);
+  box-shadow: 0 0 10px #ff0000;
 }
 
 .actionNote {
-  margin: 1rem 0 0;
-  color: #64748b;
+  color: #00aa00;
+  margin-top: 1rem;
   font-size: 0.9rem;
+  font-style: italic;
 }
 
-/* Responsive Design */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+@keyframes flicker {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.98;
+  }
+}
+
 @media (max-width: 768px) {
   .wrapper {
     padding: 1rem;
   }
-  
-  .pageHeader {
-    padding: 1.5rem;
-  }
-  
-  .section {
-    padding: 1.5rem;
-  }
-  
-  .actionSection {
-    padding: 1.5rem;
-  }
-  
-  .pageTitle {
-    font-size: 2rem;
-  }
-  
-  .statsGrid {
-    grid-template-columns: 1fr;
-  }
-  
-  .buttonGroup {
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .button {
-    width: 100%;
-    max-width: 200px;
-  }
-}
 
-@media (max-width: 480px) {
-  .wrapper {
-    padding: 0.5rem;
-  }
-  
   .pageHeader {
-    padding: 1rem;
+    padding: 1.5rem;
   }
-  
+
   .section {
-    padding: 1rem;
+    padding: 1.5rem;
   }
-  
-  .actionSection {
-    padding: 1rem;
-  }
-  
+
   .pageTitle {
     font-size: 1.75rem;
   }
-  
+
   .sectionTitle {
-    font-size: 1.25rem;
+    font-size: 1.3rem;
   }
-}
 
-/* Enhanced Focus States */
-.input:focus-visible,
-.textarea:focus-visible {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
+  .buttonGroup {
+    flex-direction: column;
+  }
 
-.button:focus-visible {
-  outline: 2px solid #3b82f6;
-  outline-offset: 2px;
-}
-
-/* Loading State (for future use) */
-.button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none !important;
-}
-
-.button:disabled:hover {
-  transform: none !important;
-  box-shadow: none !important;
+  .button {
+    width: 100%;
+    max-width: 240px;
+  }
 }

@@ -119,9 +119,6 @@ export default function SettingsPage() {
         'custom:about': profileData.about,
         'custom:email': profileData.contact.email,
         'custom:phone': profileData.contact.phone,
-        'custom:uploaded': profileData.stats.Uploaded,
-        'custom:accepted': profileData.stats.Accepted,
-        'custom:review': profileData.stats.Review,
       };
 
       console.log('SettingsPage: Updating attributes:', attributes);
@@ -153,11 +150,6 @@ export default function SettingsPage() {
       title: '',
       location: '',
       about: '',
-      stats: {
-        Uploaded: '',
-        Accepted: '',
-        Review: '',
-      },
       contact: {
         email: '',
         phone: '',
@@ -222,45 +214,6 @@ export default function SettingsPage() {
                 value={profileData.location}
                 placeholder={placeholders.location}
                 onChange={(e) => handleInputChange(null, 'location', e.target.value)}
-                className={styles.input}
-                disabled={loading}
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className={styles.section}>
-          <h2 className={styles.sectionTitle}>📊 Статистик</h2>
-          <div className={styles.statsGrid}>
-            <div className={styles.formGroup}>
-              <label className={styles.label}>Оруулсан тоо</label>
-              <input
-                type="text"
-                value={profileData.stats.Uploaded}
-                placeholder={placeholders.stats.Uploaded}
-                onChange={(e) => handleInputChange('stats', 'Uploaded', e.target.value)}
-                className={styles.input}
-                disabled={loading}
-              />
-            </div>
-            <div className={styles.formGroup}>
-              <label className={styles.label}>Зөвшөөрсөн тоо</label>
-              <input
-                type="text"
-                value={profileData.stats.Accepted}
-                placeholder={placeholders.stats.Accepted}
-                onChange={(e) => handleInputChange('stats', 'Accepted', e.target.value)}
-                className={styles.input}
-                disabled={loading}
-              />
-            </div>
-            <div className={styles.formGroup}>
-              <label className={styles.label}>Шалгуулсан тоо</label>
-              <input
-                type="text"
-                value={profileData.stats.Review}
-                placeholder={placeholders.stats.Review}
-                onChange={(e) => handleInputChange('stats', 'Review', e.target.value)}
                 className={styles.input}
                 disabled={loading}
               />

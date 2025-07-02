@@ -6,6 +6,28 @@ import { Play, MoreHorizontal } from "lucide-react";
 import styles from "../../styles/Home.module.css";
 import Header from "../../components/header";
 import HeroHome from "../../components/HeroHome";
+import { motion, AnimatePresence } from "framer-motion";
+
+function Preloader() {
+  return (
+    <motion.div initial={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.5 }} className="preloader">
+      <div className="preloader-content">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+          className="loading-spinner"
+        />
+        <motion.p
+          animate={{ opacity: [0.5, 1, 0.5] }}
+          transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY }}
+          className="loading-text"
+        >
+          Initializing AI System...
+        </motion.p>
+      </div>
+    </motion.div>
+  )
+}
 
 export default function HomePage() {
   const [videos, setVideos] = useState([]);
@@ -73,14 +95,9 @@ export default function HomePage() {
 
   if (loading) {
     return (
-      <div className={styles.loadingContainer}>
-        <div className={styles.scanLines}></div>
-        <div className={styles.loadingContent}>
-          <div className={styles.loadingSpinner}>📀</div>
-          <div className={styles.loadingText}>LOADING...</div>
-          <div className={styles.loadingBar}>████████████████████ 100%</div>
-        </div>
-      </div>
+      <AnimatePresence>
+        <Preloader />
+      </AnimatePresence>
     );
   }
 
@@ -142,7 +159,6 @@ export default function HomePage() {
                   poster="/placeholder.svg?height=140&width=250"
                   preload="metadata"
                 />
-
                 <div className={styles.caseReflection}></div>
 
                 {video.status && (
@@ -165,7 +181,9 @@ export default function HomePage() {
               </div>
 
               <div className={styles.dvdLabel}>
-                <div className={styles.titleNumber}>TITLE {String(index + 1).padStart(2, "0")}</div>
+                <div className={styles.titleNumber}>
+                  TITLE {String(index + 1).padStart(2, "0")}
+                </div>
                 <div className={styles.videoTitle}>
                   {video.key.split("/").pop()?.replace(/\.[^/.]+$/, "") || "UNTITLED"}
                 </div>
