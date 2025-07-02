@@ -40,7 +40,7 @@
   margin-top: 10px;
   width: 100%;
   padding: 12px;
-  background-color: #DF3C5F;
+  background-color: #00ff00;
   color: black;
   border: none;
   border-radius: 999px;
@@ -69,6 +69,6 @@
   margin-top: 20px;
 }
 .loginText a {
-  color: #DF3C5F;
+  color: #00ff00;
   text-decoration: underline;
 }
