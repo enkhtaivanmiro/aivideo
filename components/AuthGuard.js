@@ -10,7 +10,7 @@ export default function AuthGuard({ children }) {
   const router = useRouter();
   const pathname = usePathname();
 
-  const publicPages = ['/login', '/signup', '/forgot-password', '/'];
+  const publicPages = ['/login', '/signup', '/forgot-password', '/', '/verification'];;
   const isPublicPage = publicPages.includes(pathname);
 
   useEffect(() => {

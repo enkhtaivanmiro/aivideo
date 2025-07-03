@@ -10,7 +10,6 @@ import { ChevronDown, Play, Zap, Brain, Sparkles } from "lucide-react"
 function ParticleField() {
   const ref = useRef(null)
   const { viewport } = useThree()
-
   const particlesPosition = new Float32Array(5000 * 3)
 
   for (let i = 0; i < 5000; i++) {
@@ -54,21 +53,6 @@ function FloatingCubes() {
   )
 }
 
-function Text3D({ children, position }) {
-  return (
-    <Text
-      position={position}
-      fontSize={1}
-      color="#00ff00"
-      anchorX="center"
-      anchorY="middle"
-      font="/fonts/inter-bold.woff"
-    >
-      {children}
-    </Text>
-  )
-}
-
 function Preloader() {
   return (
     <motion.div initial={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.5 }} className="preloader">
@@ -103,7 +87,7 @@ function VideoGallery({ videos }) {
         <div className="video-grid">
           {videos.map((video, index) => (
             <motion.div
-              key={index}
+              key={video.key || index}
               initial={{ opacity: 0, scale: 0.8 }}
               whileInView={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
@@ -112,11 +96,25 @@ function VideoGallery({ videos }) {
             >
               <div className="video-card-inner">
                 <div className="video-thumbnail">
-                  <Play className="play-icon" />
+                  <video
+                    src={video.url}
+                    className="video-preview"
+                    width={250}
+                    height={140}
+                    muted
+                    loop
+                    autoPlay
+                    playsInline
+                    poster="/placeholder.svg?height=140&width=250"
+                  />
                 </div>
                 <div className="video-info">
-                  <h3 className="video-title">AI Video #{index + 1}</h3>
-                  <p className="video-description">Generated with advanced AI algorithms</p>
+                  <h3 className="video-title">
+                    {video.key?.split("/").pop()?.replace(/\.[^/.]+$/, "") || `AI Video #${index + 1}`}
+                  </h3>
+                  <p className="video-description">
+                    {video.status ? video.status.toUpperCase() : "Pending Review"}
+                  </p>
                 </div>
               </div>
             </motion.div>
@@ -128,6 +126,7 @@ function VideoGallery({ videos }) {
 }
 
 export default function HomePage() {
+  const [videos, setVideos] = useState([])
   const [loading, setLoading] = useState(true)
   const { scrollYProgress } = useScroll()
   const containerRef = useRef(null)
@@ -137,15 +136,21 @@ export default function HomePage() {
   const opacity = useTransform(scrollYProgress, [0, 0.3], [1, 0])
 
   useEffect(() => {
-    const timeout = setTimeout(() => setLoading(false), 2000)
-    return () => clearTimeout(timeout)
-  }, [])
+    async function fetchVideos() {
+      try {
+        const res = await fetch("/api/videos")
+        if (!res.ok) throw new Error("Failed to fetch videos")
+        const data = await res.json()
+        setVideos(data)
+      } catch (err) {
+        console.error(err)
+      } finally {
+        setLoading(false)
+      }
+    }
 
-  const sampleVideos = Array.from({ length: 6 }, (_, i) => ({
-    id: i,
-    title: `AI Video ${i + 1}`,
-    thumbnail: `/placeholder.svg?height=200&width=300`,
-  }))
+    fetchVideos()
+  }, [])
 
   return (
     <div ref={containerRef} className="main-container">
@@ -313,7 +318,7 @@ export default function HomePage() {
         </div>
       </motion.section>
 
-      <VideoGallery videos={sampleVideos} />
+      <VideoGallery videos={videos} />
 
       <footer className="footer">
         <div className="footer-content">

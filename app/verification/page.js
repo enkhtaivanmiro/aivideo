@@ -131,7 +131,7 @@ function VerifyEmail() {
             style={{
               background: 'none',
               border: 'none',
-              color: '#007bff',
+              color: '#00ff00',
               textDecoration: 'underline',
               cursor: 'pointer',
               fontSize: '14px'
