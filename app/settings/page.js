@@ -4,6 +4,29 @@ import { useState, useEffect } from 'react';
 import Header from '../../components/header';
 import styles from '../../styles/Settings.module.css';
 import toast from 'react-hot-toast';
+import { motion, AnimatePresence } from "framer-motion";
+
+
+function Preloader() {
+  return (
+    <motion.div initial={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.5 }} className="preloader">
+      <div className="preloader-content">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+          className="loading-spinner"
+        />
+        <motion.p
+          animate={{ opacity: [0.5, 1, 0.5] }}
+          transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY }}
+          className="loading-text"
+        >
+          Initializing AI System...
+        </motion.p>
+      </div>
+    </motion.div>
+  )
+}
 
 export default function SettingsPage() {
   const [profileData, setProfileData] = useState({
@@ -158,19 +181,13 @@ export default function SettingsPage() {
     toast.success('Profile reset to empty fields');
   };
 
-  if (initialLoading) {
-    return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '100vh',
-        color: 'white'
-      }}>
-        Loading profile data...
-      </div>
-    );
-  }
+      if (initialLoading) {
+      return (
+        <AnimatePresence>
+          <Preloader />
+        </AnimatePresence>
+      );
+    }
 
   return (
     <div className={styles.container}>

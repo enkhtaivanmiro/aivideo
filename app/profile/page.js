@@ -3,6 +3,28 @@
 import { useState, useEffect, useRef } from 'react';
 import Header from '../../components/header';
 import styles from '../../styles/Profile.module.css';
+import { motion, AnimatePresence } from "framer-motion";
+
+function Preloader() {
+  return (
+    <motion.div initial={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.5 }} className="preloader">
+      <div className="preloader-content">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+          className="loading-spinner"
+        />
+        <motion.p
+          animate={{ opacity: [0.5, 1, 0.5] }}
+          transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY }}
+          className="loading-text"
+        >
+          Initializing AI System...
+        </motion.p>
+      </div>
+    </motion.div>
+  )
+}
 
 export default function ProfilePage() {
     const [profileData, setProfileData] = useState({
@@ -118,18 +140,12 @@ export default function ProfilePage() {
         animate();
     }, []);
 
-    if (loading) {
-        return (
-            <div className={styles.container}>
-                <Header />
-                <div className="scanLines" />
-                <div className={styles.loadingContent}>
-                    <div className={styles.loadingSpinner}>📀</div>
-                    <div className={styles.loadingText}>LOADING PROFILE...</div>
-                    <div className={styles.loadingBar}>████████████████████ 100%</div>
-                </div>
-            </div>
-        );
+      if (loading) {
+      return (
+        <AnimatePresence>
+          <Preloader />
+        </AnimatePresence>
+      );
     }
 
     return (
