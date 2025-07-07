@@ -39,9 +39,11 @@ const Header = ({ currentTime }) => {
   return (
     <header className={styles.header}>
       <div className={styles.headerLeft}>
-        <div className={styles.dvdPlayerDisplay}>
-          <span className={styles.dvdPlayerText}>AI Контент</span>
-        </div>
+        <Link href="/home">
+          <div className={styles.dvdPlayerDisplay}>
+            <span className={styles.dvdPlayerText}>AI Контент</span>
+          </div>
+        </Link>
       </div>
 
       <div className={styles.headerCenter}>
@@ -56,7 +58,6 @@ const Header = ({ currentTime }) => {
       <div className={styles.headerRight}>
         <nav className={styles.navLinks}>
           <Link href="/home">НҮҮР</Link>
-          <Link href="#">АНГИЛАЛ</Link>
         </nav>
 
         <div
